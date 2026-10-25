@@ -1,0 +1,99 @@
+{
+  "header": {
+    "schema_version": 2,
+    "project_key": "DEMO-AEP",
+    "domain": "aep",
+    "created_utc": "2026-06-30T10:00:00Z",
+    "phase_range": {
+      "from": "phase0",
+      "to": "report"
+    }
+  },
+  "inputs": {
+    "config_canonical": {
+      "cpj": 1.2,
+      "taux_pct": 3.5
+    },
+    "fallback_registry": {
+      "rugosite_defaut": 130
+    },
+    "network_canonical": {
+      "n_nodes": 306,
+      "n_links": 327
+    },
+    "demand": {
+      "p_base": 35848,
+      "taux_pct": 3.5,
+      "horizons": [
+        2025,
+        2030,
+        2035
+      ],
+      "cpj": 1.2
+    },
+    "geo_refs": {
+      "dem_raster_sha": "deadbeef",
+      "atlas_realization_ids": [
+        "sgs:TG-GOLFE:r001",
+        "sgs:TG-GOLFE:r002"
+      ],
+      "atlas_pipeline_version": "L1-L5@9f8e7d",
+      "thiessen_method": "voronoi_exact"
+    }
+  },
+  "scenario": {
+    "ensemble_seed": 42,
+    "n_realizations": 200,
+    "axes": {
+      "demand_growth": "gompertz",
+      "iws_schedule": "6h-peak",
+      "power_outage": "poisson",
+      "roughness": "lognormal",
+      "soil": "atlas_sgs"
+    }
+  },
+  "outputs": {
+    "distribution": {
+      "n_troncons": 327,
+      "longueur_m": 153271.11,
+      "solveurs": [
+        "lcpi",
+        "ensemble"
+      ]
+    },
+    "robustness": {
+      "p_service_ge_target": 0.96,
+      "equity_index": 0.82,
+      "resilience_outage": 0.71
+    },
+    "costs": {
+      "capex_fcfa": 275931289.0,
+      "tarif_eie": 412.5
+    }
+  },
+  "gates": [
+    {
+      "id": "P0_PREFLIGHT_HASH",
+      "status": "PASS",
+      "evidence": "c5997530"
+    },
+    {
+      "id": "DI07_OPTIM_FEASIBLE",
+      "status": "PASS",
+      "evidence": "p_service=0.96"
+    },
+    {
+      "id": "C01_CAPEX_POSITIF",
+      "status": "PASS"
+    }
+  ],
+  "ices_envelope": {
+    "alg": "Ed25519",
+    "digest_alg": "SHA3-256",
+    "digest": "2028f4be7a414290a3f69884489f734bc95ec787d67cd9ab25e9c324f3e40331",
+    "sig": "gn+Eq4YFjwkI+yj6MQr90bKRCeyhcq02OAzpFY93/kiYN0she9cRHkyBkqv54yFkt/ddE+SAakjnCc9Om6TFAA==",
+    "pubkey": "zO6uRfxEy6mSTX/niFkMJOB38p4OW4c1UHahv4qhk+k=",
+    "signed_at": "2026-06-30T10:00:01Z",
+    "key_id": "demo-aep-01"
+  }
+}

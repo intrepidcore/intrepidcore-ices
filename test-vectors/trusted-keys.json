@@ -1,0 +1,23 @@
+[
+  {
+    "key_id": "demo-aep-01",
+    "pubkey": "zO6uRfxEy6mSTX/niFkMJOB38p4OW4c1UHahv4qhk+k=",
+    "did": "did:key:z6MktFEJid4R1kMwm6z6zh99kVZ8Z1b2diKXyzJkuuhKiw8t",
+    "valid_from": "2026-01-01T00:00:00Z",
+    "revoked_at": null
+  },
+  {
+    "key_id": "demo-atlas-01",
+    "pubkey": "Dz80ClKgDWW9RjU8+tAvaKTuWMlW4Tm1WvsU3OfbTQc=",
+    "did": "did:key:z6MkfUn4LCofrHFSRCPpuCaysztHkRGmaVWeH7jjhZr4z4Sz",
+    "valid_from": "2026-01-01T00:00:00Z",
+    "revoked_at": null
+  },
+  {
+    "key_id": "demo-revoquee-01",
+    "pubkey": "e8vBxo+hIjjyw774dt3cEvfg7Wx2GH89UHExQUR+9vQ=",
+    "did": "did:key:z6MknnWPvJQUSK7g1J7ezGdPvPYxKaNCwKeZ3ASLsRTvyB23",
+    "valid_from": "2026-01-01T00:00:00Z",
+    "revoked_at": "2026-06-30T10:00:00Z"
+  }
+]

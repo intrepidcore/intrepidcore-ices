@@ -1,0 +1,281 @@
+%% ============================================================
+%% INTREPIDCORE — ic-editorial.tex (guide de rédaction v7.0)
+%% Bibliothèque du style éditorial abstrait et géométrique.
+%%   1. Jetons de couleur des deux ambiances (Marque et Terre)
+%%   2. Motifs de l'Atlas (ic-motifs.tex) et cartes de motif
+%%   3. Ouvertures de partie (ambiance Marque) et couverture éditoriale
+%%   4. Bibliothèque de l'ambiance Terre (trait irrégulier)
+%% Prérequis : xelatex, tikz (calc, arrows.meta, decorations.pathmorphing),
+%% xcolor, les couleurs papier / intrepid / accent / cyanIC / vertLab du
+%% préambule, et la macro \papertexture.
+%% ============================================================
+
+%% ── 1. Jetons de couleur ────────────────────────────────────
+%% Ambiance Marque : alignée sur la palette de production
+\colorlet{mnavy}{intrepid}
+\colorlet{morange}{accent}
+\colorlet{mcyan}{cyanIC}
+\colorlet{mvert}{vertLab}
+\colorlet{mpapier}{papier}
+\definecolor{mblanc}{HTML}{FFFDF9}
+\definecolor{mencre}{HTML}{1C2329}
+\definecolor{mgris}{HTML}{65717C}
+\definecolor{mligne}{HTML}{D8D8D1}
+\definecolor{mpoint}{HTML}{DFDBD4}
+%% Ambiance Terre
+\definecolor{tcotta}{RGB}{196,98,61}
+\definecolor{tcottaL}{RGB}{219,154,116}
+\definecolor{creme}{RGB}{243,234,217}
+\definecolor{beige}{RGB}{227,212,184}
+\definecolor{sable}{RGB}{217,183,126}
+\definecolor{argile}{RGB}{233,205,185}
+\definecolor{noirenc}{RGB}{30,27,24}
+
+%% ── 2. Motifs et cartes ─────────────────────────────────────
+\newcommand{\Motif}[1]{\csname Motif#1\endcsname}
+\input{ic-motifs}
+%% Carte : motif sur fond papier, rogné au cadre 150 x 100. \IEcard[échelle]{A01}
+\newcommand{\IEcard}[2][1.4]{%
+  \begin{tikzpicture}[x=1pt,y=1pt,scale=#1]
+    \fill[mpapier!70!white] (0,0) rectangle (150,100);
+    \begin{scope}\clip (0,0) rectangle (150,100);\Motif{#2}\end{scope}
+    \draw[mligne,line width=0.4pt] (0,0) rectangle (150,100);
+  \end{tikzpicture}}
+
+%% Noms des motifs
+\newcommand{\IEdef}[2]{\expandafter\gdef\csname IEname@#1\endcsname{#2}}
+\IEdef{A01}{Noyau et satellites}\IEdef{A02}{Strates emboîtées}\IEdef{A03}{Maillage modulaire}
+\IEdef{A04}{Équilibre des contraintes}\IEdef{A05}{Interface commune}\IEdef{A06}{Ossature assemblée}
+\IEdef{B01}{Chaîne de transformations}\IEdef{B02}{Relais successifs}\IEdef{B03}{Branches réunifiées}
+\IEdef{B04}{Filtre et sélection}\IEdef{B05}{Boucle de rétroaction}\IEdef{B06}{Distribution ramifiée}
+\IEdef{C01}{Dispersion autour d'un repère}\IEdef{C02}{Famille de scénarios}\IEdef{C03}{Centre mobile}
+\IEdef{C04}{Domaines superposés}\IEdef{C05}{Perturbation locale}\IEdef{C06}{Éventail de possibilités}
+\IEdef{D01}{Contributions coordonnées}\IEdef{D02}{Arbitrage vers une sortie}\IEdef{D03}{Intersection des exigences}
+\IEdef{D04}{Alignement progressif}\IEdef{D05}{Approche itérative}\IEdef{D06}{Décision collégiale}
+\newcommand{\IEname}[1]{\csname IEname@#1\endcsname}
+
+%% ── 3. Ouvertures de partie (ambiance Marque) ───────────────
+%% Composition : motif en tiers supérieur, étiquette et titre au centre,
+%% filet et provenance du motif en pied. Rien d'autre sur la page.
+\newcommand{\IEopener}[3]{% étiquette, titre, motif
+  \clearpage\thispagestyle{empty}\papertexture
+  \begin{tikzpicture}[remember picture,overlay,shift={(current page.center)}]
+    \begin{scope}[shift={(0,6.9cm)},x=1pt,y=1pt,scale=2.55]
+      \begin{scope}[shift={(-75,-50)}]
+        \begin{scope}\clip (-6,-6) rectangle (156,106);\Motif{#3}\end{scope}
+      \end{scope}
+    \end{scope}
+    \node[align=center,text width=14cm,text=morange] at (0,0.2)
+      {\ttfamily\fontsize{10}{12}\selectfont\MakeUppercase{#1}};
+    \node[align=center,text width=14.5cm,text=mnavy,execute at begin node={\hyphenpenalty=10000 \exhyphenpenalty=10000 }] at (0,-1.9)
+      {\fontsize{30}{35}\selectfont\bfseries #2};
+    \draw[mnavy,line width=0.5pt] (-8.2,-10.2) -- (8.2,-10.2);
+    \node[anchor=west,text=mgris] at (-8.2,-10.8) {\ttfamily\fontsize{7.5}{9}\selectfont GUIDE DE RÉDACTION \textperiodcentered\ VERSION 7.0};
+    \node[anchor=east,text=mgris] at (8.2,-10.8) {\ttfamily\fontsize{7.5}{9}\selectfont MOTIF #3 \textperiodcentered\ \MakeUppercase{\IEname{#3}}};
+  \end{tikzpicture}\clearpage}
+%% Partie numérotée et partie non numérotée, avec entrée de table des matières
+\newcommand{\IEpart}[2]{%
+  \refstepcounter{part}\phantomsection
+  \addcontentsline{toc}{part}{\protect\numberline{\thepart}#1}%
+  \IEopener{Partie \thepart}{#1}{#2}}
+\newcommand{\IEpartstar}[2]{%
+  \phantomsection\addcontentsline{toc}{part}{#1}%
+  \IEopener{Clôture}{#1}{#2}}
+
+%% ── 4. Bibliothèque de l'ambiance Terre ─────────────────────
+\tikzset{
+  hand/.style={decorate,decoration={random steps,segment length=3.2mm,amplitude=0.55pt},
+               line width=1.15pt,draw=noirenc,line join=round,line cap=round},
+  handthin/.style={decorate,decoration={random steps,segment length=2.6mm,amplitude=0.4pt},
+               line width=0.7pt,draw=noirenc,line cap=round},
+}
+\newcommand{\chapterpagebegin}[1]{%
+  \clearpage\thispagestyle{empty}%
+  \begin{tikzpicture}[remember picture,overlay,shift={(current page.center)}]
+    \fill[#1] (-10.6,-15) rectangle (10.6,15);
+    \pgfmathsetseed{7}
+}
+\newcommand{\chapterpagetext}[3]{% numéro, titre, couleur du texte
+    \node[align=center,text width=13cm,text=#3,execute at begin node={\hyphenpenalty=10000 \exhyphenpenalty=10000 \lefthyphenmin=99 \righthyphenmin=99 }] at (0,0)
+      {{\fontsize{14}{17}\selectfont\bfseries\MakeUppercase{Chapitre #1}}\\[10pt]
+       {\fontsize{30}{35}\selectfont\bfseries #2}};
+  \end{tikzpicture}\newpage}
+\newcommand{\handcircle}[4]{% x y rayon couleur
+  \fill[#4] (#1+0.09,#2-0.07) circle (#3);
+  \pgfmathparse{(#3)<0.95?1:0}\ifdim\pgfmathresult pt>0pt\draw[noirenc,line width=1.0pt] (#1,#2) circle (#3);\else\draw[hand] (#1,#2) circle (#3);\fi}
+\newcommand{\handrect}[5]{% x1 y1 x2 y2 couleur
+  \fill[#5] (#1+0.10,#2-0.08) rectangle (#3+0.10,#4-0.08);
+  \draw[hand] (#1,#2) rectangle (#3,#4);}
+\newcommand{\handtri}[7]{% x1 y1 x2 y2 x3 y3 couleur
+  \fill[#7] (#1+0.10,#2-0.08) -- (#3+0.10,#4-0.08) -- (#5+0.10,#6-0.08) -- cycle;
+  \draw[hand] (#1,#2) -- (#3,#4) -- (#5,#6) -- cycle;}
+\newcommand{\handwave}[4]{% x1 x2 y amplitude
+  \draw[hand] (#1,#3) .. controls (#1+2,#3+#4) and (#1+4,#3-#4) .. (#1+6,#3)
+    .. controls (#1+8,#3+#4) and (#1+10,#3-#4) .. (#1+12,#3)
+    .. controls (#1+14,#3+#4) and (#1+16,#3-#4) .. (#1+18,#3);}
+
+%% ── 5. Aides de mise en page ────────────────────────────────
+%% Pastille de couleur (fond clair visible grâce au liseré)
+\newcommand{\IEsw}[1]{\fcolorbox{grisclair!45}{#1}{\rule{0pt}{6pt}\rule{6pt}{0pt}}}
+%% Légende de motif : identifiant, nom, lecture, usage
+\newcommand{\IEinfo}[4]{{\footnotesize\textbf{#1}~\textbf{#2.} #3 \textit{Usage~: #4.}}}
+%% Miniature d'une page d'un PDF, encadrée d'un filet fin : fichier, page, largeur
+\newcommand{\IEthumb}[3]{{\setlength{\fboxsep}{0pt}\setlength{\fboxrule}{0.4pt}\fcolorbox{grisclair!60}{white}{\includegraphics[page=#2,width=#3]{#1}}}}
+
+%% ── 6. Ouvertures de partie, ambiance Terre (guide v7.0) ─────
+%% Étiquette « PARTIE n » (ou « CLÔTURE »), titre, couleur du texte
+\newcommand{\IEterretext}[3]{%
+    \node[align=center,text width=13cm,text=#3,execute at begin node={\hyphenpenalty=10000 \exhyphenpenalty=10000 \lefthyphenmin=99 \righthyphenmin=99 }] at (0,0)
+      {{\fontsize{14}{17}\selectfont\bfseries\MakeUppercase{#1}}\\[10pt]
+       {\fontsize{30}{35}\selectfont\bfseries #2}};
+  \end{tikzpicture}\newpage}
+\newcommand{\IEpartT}[2]{%
+  \refstepcounter{part}\phantomsection
+  \addcontentsline{toc}{part}{\protect\numberline{\thepart}#1}%
+  \csname IEterre@#2\endcsname{Partie \thepart}{#1}}
+\newcommand{\IEpartTstar}[2]{%
+  \phantomsection\addcontentsline{toc}{part}{#1}%
+  \csname IEterre@#2\endcsname{Fin du guide}{#1}}
+
+%% 1 · Support physique : feuille, marges, règle, cellules de grille
+\expandafter\newcommand\csname IEterre@1\endcsname[2]{\chapterpagebegin{tcotta}
+    \handrect{-4.2}{5.2}{3.6}{13.6}{creme}
+    \draw[handthin,dashed] (-3.3,6.0) rectangle (2.7,12.8);
+    \foreach \y in {11.4,10.4,9.4,8.4}{\draw[handthin] (-2.6,\y) -- (2.0,\y);}
+    \draw[hand,line width=1.0pt,creme] (-6.6,5.4) -- (-6.6,13.4);
+    \foreach \y in {6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0}{\draw[handthin,creme] (-6.6,\y) -- (-6.0,\y);}
+    \handcircle{7.0}{11.0}{1.3}{beige}
+    \handrect{-8.2}{-6.0}{-3.2}{-9.0}{creme}\handrect{-2.6}{-6.0}{2.4}{-9.0}{beige}\handrect{3.0}{-6.0}{8.0}{-9.0}{creme}
+    \handrect{-9.8}{-13.4}{9.8}{-12.0}{beige}
+  \IEterretext{#1}{#2}{creme}}
+%% 2 · Typographie : un « A » géométrique, lignes de texte, caractères
+\expandafter\newcommand\csname IEterre@2\endcsname[2]{\chapterpagebegin{beige}
+    \handtri{-3.6}{5.4}{0.0}{13.4}{3.6}{5.4}{tcotta}
+    \handrect{-1.7}{7.6}{1.7}{8.5}{creme}
+    \foreach \y in {12.4,11.2,10.0}{\draw[hand] (5.2,\y) -- (9.4,\y);}
+    \handcircle{-7.4}{11.4}{1.2}{sable}
+    \handcircle{-6.2}{-8.0}{1.5}{tcotta}\handrect{-3.4}{-9.6}{-0.4}{-6.6}{creme}\handtri{1.2}{-9.6}{2.8}{-6.4}{4.4}{-9.6}{sable}
+    \draw[hand] (-8.8,-10.4) -- (8.8,-10.4);
+    \handcircle{7.2}{-7.6}{0.6}{tcotta}
+  \IEterretext{#1}{#2}{noirenc}}
+%% 3 · Structuration : niveaux emboîtés, escalier
+\expandafter\newcommand\csname IEterre@3\endcsname[2]{\chapterpagebegin{argile}
+    \handrect{-8.0}{12.6}{6.0}{13.6}{tcotta}\handrect{-6.5}{11.0}{4.5}{12.0}{creme}
+    \handrect{-5.0}{9.4}{3.0}{10.4}{sable}\handrect{-3.5}{7.8}{1.5}{8.8}{tcotta}
+    \handcircle{7.6}{9.6}{1.4}{creme}
+    \handrect{-3.2}{-6.0}{3.2}{-12.4}{creme}\handrect{-2.0}{-7.4}{2.0}{-11.0}{tcotta}\handcircle{0}{-9.2}{0.9}{creme}
+    \handrect{-9.8}{-13.4}{-5.6}{-12.4}{sable}
+  \IEterretext{#1}{#2}{noirenc}}
+%% 4 · Pagination : pile de pages, suite de pages numérotées
+\expandafter\newcommand\csname IEterre@4\endcsname[2]{\chapterpagebegin{sable}
+    \handrect{-4.8}{5.6}{1.2}{13.2}{beige}\handrect{-4.0}{5.1}{2.0}{12.7}{creme}\handrect{-3.2}{4.6}{2.8}{12.2}{beige}
+    \foreach \y in {11.0,10.0,9.0}{\draw[handthin] (-2.4,\y) -- (1.8,\y);}
+    \handcircle{7.2}{10.0}{1.5}{tcotta}
+    \foreach \x/\c in {-7/creme,-3.5/tcotta,0/creme,3.5/tcotta,7/creme}{\handrect{\x-1.0}{-7.0}{\x+1.0}{-9.0}{\c}}
+    \foreach \x in {-5.2,-1.7,1.8,5.3}{\draw[hand,-{Stealth[length=2.4mm]}] (\x,-8.0) -- (\x+0.9,-8.0);}
+  \IEterretext{#1}{#2}{noirenc}}
+%% 5 · En-tête et pied de page : feuille à deux bandeaux
+\expandafter\newcommand\csname IEterre@5\endcsname[2]{\chapterpagebegin{creme}
+    \handrect{-4.6}{5.0}{4.6}{13.6}{beige}
+    \handrect{-4.6}{12.0}{4.6}{13.6}{tcotta}\handrect{-4.6}{5.0}{4.6}{6.4}{tcotta}
+    \foreach \y in {10.6,9.6,8.6,7.6}{\draw[handthin] (-3.4,\y) -- (3.4,\y);}
+    \handcircle{8.0}{11.0}{1.0}{tcottaL}
+    \handrect{-9.0}{-6.8}{9.0}{-8.0}{tcotta}\handrect{-9.0}{-10.0}{9.0}{-11.2}{beige}
+    \handcircle{-7.2}{-9.0}{0.5}{tcotta}\handcircle{7.2}{-9.0}{0.5}{tcotta}
+  \IEterretext{#1}{#2}{noirenc}}
+%% 6 · Éléments visuels : histogramme, tableau, courbe
+\expandafter\newcommand\csname IEterre@6\endcsname[2]{\chapterpagebegin{tcottaL}
+    \handrect{-8.0}{5.6}{-6.6}{8.6}{creme}\handrect{-6.0}{5.6}{-4.6}{11.0}{tcotta}\handrect{-4.0}{5.6}{-2.6}{9.6}{creme}\handrect{-2.0}{5.6}{-0.6}{12.4}{beige}
+    \draw[hand] (-8.6,5.6) -- (0.2,5.6);
+    \handrect{2.2}{6.0}{8.6}{12.4}{creme}
+    \foreach \y in {8.1,10.2}{\draw[handthin] (2.2,\y) -- (8.6,\y);}
+    \foreach \x in {4.3,6.4}{\draw[handthin] (\x,6.0) -- (\x,12.4);}
+    \handwave{-9.0}{0}{-7.6}{0.7}\handwave{-9.0}{0}{-9.2}{0.7}
+    \handcircle{6.4}{-8.0}{1.6}{creme}\handtri{1.0}{-10.6}{2.8}{-6.6}{4.6}{-10.6}{beige}
+  \IEterretext{#1}{#2}{noirenc}}
+%% 7 · Style éditorial : les cinq formes élémentaires et l'ombre décalée
+\expandafter\newcommand\csname IEterre@7\endcsname[2]{\chapterpagebegin{tcotta}
+    \handcircle{-7.0}{9.4}{1.3}{creme}\handrect{-4.6}{8.2}{-2.2}{10.6}{beige}\handtri{-1.4}{8.2}{0.2}{10.9}{1.8}{8.2}{sable}
+    \draw[hand,-{Stealth[length=3mm]}] (3.4,9.4) -- (6.4,9.4);\draw[hand] (7.2,9.4) -- (9.0,9.4);
+    \handwave{-9.0}{0}{12.4}{0.5}
+    \handrect{-3.4}{-6.0}{3.4}{-12.4}{creme}
+    \draw[handthin,dashed] (-3.4,-6.0) rectangle (3.4,-12.4);
+    \handcircle{7.0}{-9.0}{1.2}{beige}\handcircle{-7.0}{-8.0}{0.6}{sable}
+  \IEterretext{#1}{#2}{creme}}
+%% 8 · Normes de rédaction et de citation : livre ouvert, guillemets, crochets
+\expandafter\newcommand\csname IEterre@8\endcsname[2]{\chapterpagebegin{argile}
+    \handrect{-6.2}{6.0}{-0.2}{12.6}{creme}\handrect{0.2}{6.0}{6.2}{12.6}{beige}
+    \foreach \y in {11.2,10.2,9.2,8.2}{\draw[handthin] (-5.2,\y) -- (-1.2,\y);\draw[handthin] (1.2,\y) -- (5.2,\y);}
+    \handcircle{-2.4}{-8.0}{1.5}{tcotta}\handtri{-3.6}{-9.2}{-1.6}{-9.2}{-2.6}{-11.2}{tcotta}
+    \handcircle{2.4}{-8.0}{1.5}{tcotta}\handtri{1.2}{-9.2}{3.2}{-9.2}{2.2}{-11.2}{tcotta}
+    \draw[hand] (-8.6,-6.0) -- (-9.2,-6.0) -- (-9.2,-11.0) -- (-8.6,-11.0);\draw[hand] (8.6,-6.0) -- (9.2,-6.0) -- (9.2,-11.0) -- (8.6,-11.0);
+  \IEterretext{#1}{#2}{noirenc}}
+%% 9 · Métadonnées, gouvernance, preuve : sceau et chaîne de preuve
+\expandafter\newcommand\csname IEterre@9\endcsname[2]{\chapterpagebegin{beige}
+    \handcircle{0}{9.4}{3.4}{tcotta}\handcircle{0}{9.4}{2.2}{creme}\handcircle{0}{9.4}{0.9}{tcotta}
+    \handcircle{-7.6}{12.0}{0.8}{sable}\handcircle{7.6}{7.0}{1.1}{argile}
+    \handrect{-8.8}{-6.6}{-6.0}{-9.4}{creme}\handrect{-4.4}{-6.6}{-1.6}{-9.4}{tcotta}\handrect{1.6}{-6.6}{4.4}{-9.4}{creme}\handrect{6.0}{-6.6}{8.8}{-9.4}{tcotta}
+    \foreach \x in {-6.0,-1.6,4.4}{\draw[hand,line width=1.4pt] (\x,-8.0) -- (\x+1.6,-8.0);}
+    \draw[hand] (-9.4,-12.6) -- (9.4,-12.6);
+  \IEterretext{#1}{#2}{noirenc}}
+%% 10 · Gabarits : une feuille remplie, deux gabarits vides en pointillé
+\expandafter\newcommand\csname IEterre@10\endcsname[2]{\chapterpagebegin{sable}
+    \handrect{-8.2}{5.4}{-3.0}{13.4}{creme}
+    \foreach \y in {12.0,11.0,10.0}{\draw[handthin] (-7.4,\y) -- (-3.8,\y);}
+    \draw[handthin,dashed] (-2.2,5.4) rectangle (3.0,13.4);\draw[handthin,dashed] (3.8,5.4) rectangle (9.0,13.4);
+    \handcircle{0.4}{9.4}{0.8}{tcotta}
+    \handrect{-3.0}{-6.4}{3.0}{-12.0}{tcotta}\handcircle{0}{-9.2}{1.7}{creme}
+    \handrect{-9.8}{-13.4}{-6.0}{-12.4}{beige}
+  \IEterretext{#1}{#2}{noirenc}}
+%% 11 · Production et publication : chaîne de fabrication
+\expandafter\newcommand\csname IEterre@11\endcsname[2]{\chapterpagebegin{creme}
+    \draw[hand,line width=1.4pt] (-9.0,9.0) -- (9.0,9.0);
+    \handrect{-8.0}{9.0}{-5.2}{11.4}{tcotta}\handrect{-3.4}{9.0}{-0.6}{11.4}{beige}\handrect{1.2}{9.0}{4.0}{11.4}{tcottaL}
+    \handcircle{7.0}{10.4}{1.4}{tcotta}
+    \draw[hand,-{Stealth[length=3mm]}] (-8.0,6.6) -- (6.0,6.6);
+    \handcircle{-4.0}{-8.0}{2.2}{beige}\handcircle{-4.0}{-8.0}{0.8}{tcotta}
+    \handtri{2.0}{-10.4}{2.0}{-5.6}{6.4}{-8.0}{tcotta}
+    \handrect{-9.8}{-13.4}{9.8}{-12.4}{beige}
+  \IEterretext{#1}{#2}{noirenc}}
+%% 12 · Références du dépôt : arborescence de dossiers
+\expandafter\newcommand\csname IEterre@12\endcsname[2]{\chapterpagebegin{tcottaL}
+    \handrect{-1.6}{12.0}{1.6}{13.4}{creme}
+    \draw[hand] (0,12.0) -- (0,11.0);\draw[hand] (-5.5,11.0) -- (5.5,11.0);
+    \foreach \x in {-5.5,0,5.5}{\draw[hand] (\x,11.0) -- (\x,10.0);\handrect{\x-1.5}{8.6}{\x+1.5}{10.0}{beige}}
+    \foreach \x in {-5.5,5.5}{\draw[hand] (\x,8.6) -- (\x,7.6);\handrect{\x-1.0}{6.2}{\x+1.0}{7.6}{creme}}
+    \handcircle{-6.0}{-8.0}{1.2}{creme}\handcircle{0}{-9.4}{1.6}{tcotta}\handcircle{6.0}{-8.0}{1.2}{beige}
+    \draw[hand] (-6.0,-8.0) -- (0,-9.4) -- (6.0,-8.0);
+  \IEterretext{#1}{#2}{noirenc}}
+%% 13 · Cas particuliers : une forme qui sort de la rangée
+\expandafter\newcommand\csname IEterre@13\endcsname[2]{\chapterpagebegin{argile}
+    \foreach \x in {-8.0,-4.2,-0.4,7.2}{\handrect{\x-1.2}{9.0}{\x+1.2}{11.4}{creme}}
+    \handtri{2.2}{8.8}{3.4}{12.2}{4.6}{8.8}{tcotta}
+    \draw[hand,line width=1.4pt] (-9.0,6.8) -- (9.0,6.8);
+    \draw[hand,line width=1.2pt] (-9.0,-8.0) -- (-3.0,-8.0) .. controls (-1.0,-8.0) and (0.0,-5.4) .. (2.0,-5.4) .. controls (4.0,-5.4) and (4.6,-8.0) .. (6.0,-8.0) -- (9.0,-8.0);
+    \handcircle{2.0}{-5.4}{0.7}{tcotta}\handcircle{-5.4}{-11.0}{1.3}{sable}
+  \IEterretext{#1}{#2}{noirenc}}
+%% 14 · Annexes : feuilles superposées à onglets
+\expandafter\newcommand\csname IEterre@14\endcsname[2]{\chapterpagebegin{beige}
+    \handrect{-5.0}{5.6}{3.4}{13.2}{sable}\handrect{-4.2}{5.1}{4.2}{12.7}{creme}\handrect{-3.4}{4.6}{5.0}{12.2}{tcottaL}
+    \handrect{5.0}{11.0}{6.4}{12.2}{tcotta}\handrect{5.0}{9.0}{6.4}{10.2}{creme}\handrect{5.0}{7.0}{6.4}{8.2}{tcotta}
+    \foreach \y in {10.8,9.8,8.8}{\draw[handthin] (-2.4,\y) -- (3.0,\y);}
+    \handcircle{-8.2}{11.0}{1.0}{tcotta}
+    \foreach \x/\c in {-6.0/tcotta,-1.0/creme,4.0/sable}{\handrect{\x-1.4}{-6.4}{\x+1.4}{-9.4}{\c}}
+    \handrect{-9.8}{-13.4}{9.8}{-12.4}{sable}
+  \IEterretext{#1}{#2}{noirenc}}
+%% 15 · Glossaire et index : colonnes d'entrées, onglets alphabétiques
+\expandafter\newcommand\csname IEterre@15\endcsname[2]{\chapterpagebegin{sable}
+    \foreach \y/\l in {12.6/3.6,11.4/5.0,10.2/2.8,9.0/4.4,7.8/3.2,6.6/4.0}{\handcircle{-8.0}{\y}{0.32}{tcotta}\handrect{-7.2}{\y-0.22}{-7.2+\l}{\y+0.22}{creme}}
+    \foreach \y/\l in {12.6/4.2,11.4/2.6,10.2/4.8,9.0/3.4,7.8/5.0,6.6/2.4}{\handcircle{1.2}{\y}{0.32}{tcotta}\handrect{2.0}{\y-0.22}{2.0+\l}{\y+0.22}{beige}}
+    \foreach \x/\h in {-8.0/2.6,-6.2/3.4,-4.4/2.2,-2.6/3.8,-0.8/2.8,1.0/3.2,2.8/2.0,4.6/3.6,6.4/2.4,8.2/3.0}{\handrect{\x-0.7}{-5.6}{\x+0.7}{-5.6-\h}{tcotta}}
+    \handrect{-9.8}{-13.4}{9.8}{-12.4}{beige}
+  \IEterretext{#1}{#2}{noirenc}}
+%% 16 · Clôture : soleil bas sur l'horizon
+\expandafter\newcommand\csname IEterre@16\endcsname[2]{\chapterpagebegin{tcotta}
+    \handcircle{0}{9.4}{3.4}{creme}
+    \foreach \a in {20,50,80,110,140,170}{\draw[handthin,creme] ({4.2*cos(\a)},{9.4+4.2*sin(\a)}) -- ({5.2*cos(\a)},{9.4+5.2*sin(\a)});}
+    \fill[tcotta] (-10.6,5.2) rectangle (10.6,7.0);
+    \handwave{-9.0}{0}{6.2}{0.6}\handwave{-9.0}{0}{4.8}{0.6}
+    \handrect{-9.8}{-13.4}{9.8}{-12.0}{beige}
+    \handrect{-4.0}{-9.0}{4.0}{-6.0}{beige}\handcircle{7.4}{-8.4}{1.1}{creme}\handcircle{-7.4}{-8.4}{0.7}{creme}
+  \IEterretext{#1}{#2}{creme}}

@@ -58,10 +58,10 @@
   "ices_envelope": {
     "alg": "Ed25519",
     "digest_alg": "SHA3-256",
-    "digest": "6122b64cce98978866cc5bb58afda45ec2e444b99790f664a6d1138668baa0d3",
-    "sig": "7J4+6hirvcrnkU89t2i/Cb9IPFIkaUuH+QXLH1xntjwfecy6opNDrf6RO4XJCSCsZLre2FALZalCkPNqvrJ/CQ==",
-    "pubkey": "zkeEN7oQkGbAplGQNnIPg/XM4JuPAydTUQhVZ4epuxI=",
+    "digest": "5f31f6f3847425c8b40935091a58b0b4d3b6fbd097cc589cb047f7aac594760d",
+    "sig": "UVitIWsgSEr04hk/8bhjrE9LJJLyq7y+3mDmimxzxH+h8IZXNjcFGvQsCItjYc7zPuqCn95WDdNgx/h2Um0cDg==",
+    "pubkey": "Dz80ClKgDWW9RjU8+tAvaKTuWMlW4Tm1WvsU3OfbTQc=",
     "signed_at": "2026-06-30T10:00:01Z",
-    "key_id": "fde-demo-01"
+    "key_id": "demo-atlas-01"
   }
 }

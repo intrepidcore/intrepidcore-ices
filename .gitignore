@@ -23,3 +23,5 @@ target/
 *.pem
 *.env
 secrets/
+*.lof
+*.lot

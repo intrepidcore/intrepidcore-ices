@@ -1,0 +1,650 @@
+%% ============================================================
+%% INTREPIDCORE — ic-motifs.tex
+%% Les 24 motifs de l'Atlas graphique IntrepidCore (familles A à D),
+%% dessinés en TikZ natif. Source : Atlas_IntrepidCore_24_motifs_source_LaTeX.zip,
+%% fichier atlas_intrepidcore.tex (octobre 2026).
+%% Adaptation : les noms de couleur sont préfixés par « m » (mnavy, morange,
+%% mcyan, mvert, mblanc, mencre, mgris, mligne, mpoint, mpapier) pour ne pas
+%% redéfinir les couleurs xcolor « orange » et « cyan ». Les couleurs mnavy,
+%% morange, mcyan, mvert, mpapier sont alignées sur la palette du guide
+%% (définies dans ic-editorial.tex).
+%% Cadre de dessin : 150 x 100 unités ; appel : \Motif{A01} dans une
+%% tikzpicture [x=1pt,y=1pt,scale=...]. Statut : proposition graphique.
+%% ============================================================
+%% A01 | Noyau et satellites
+\expandafter\def\csname MotifA01\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\draw[draw=mnavy,fill=none,line width=1.6pt] (25,70) -- (76,49);
+\draw[draw=mnavy,fill=none,line width=1.6pt] (36,20) -- (76,49);
+\draw[draw=mnavy,fill=none,line width=1.6pt] (125,69) -- (76,49);
+\draw[draw=mnavy,fill=none,line width=1.6pt] (118,22) -- (76,49);
+\path[draw=none,fill=mnavy] (75,49) circle[radius=23];
+\path[draw=none,fill=mblanc] (75,49) circle[radius=12];
+\path[draw=mnavy,fill=mblanc,line width=1.8pt,rounded corners=2pt] (15,60) rectangle (35,80);
+\path[draw=mnavy,fill=mblanc,line width=1.8pt,rounded corners=2pt] (28,12) rectangle (44,28);
+\path[draw=mnavy,fill=mblanc,line width=1.8pt,rounded corners=2pt] (115,59) rectangle (135,79);
+\path[draw=mnavy,fill=mblanc,line width=1.8pt,rounded corners=2pt] (110,14) rectangle (126,30);
+\path[draw=none,fill=morange] (76,49) circle[radius=3];
+\draw[draw=morange,fill=none,line width=1.5pt] (35,70) -- (116,20);
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% A02 | Strates emboîtées
+\expandafter\def\csname MotifA02\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=mnavy,fill=mblanc,line width=2.2pt,rounded corners=2pt] (25,18) rectangle (100,80);
+\path[draw=mnavy,fill=mblanc,line width=2.2pt,rounded corners=2pt] (43,32) rectangle (118,94);
+\path[draw=none,fill=mnavy,rounded corners=2pt] (56,13) rectangle (118,76);
+\path[draw=none,fill=mblanc] (88,47) circle[radius=19];
+\path[draw=none,fill=morange] (88,47) circle[radius=9];
+\path[draw=morange,fill=mblanc,line width=2pt,rounded corners=2pt] (33,59) rectangle (53,70);
+\draw[draw=morange,fill=none,line width=1.1pt] (28,13) -- (123,85);
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% A03 | Maillage modulaire
+\expandafter\def\csname MotifA03\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=mnavy,fill=mnavy,line width=1.4pt,rounded corners=1.5pt] (20,17) rectangle (44,38);
+\path[draw=none,fill=morange,rounded corners=1.5pt] (47,17) rectangle (71,38);
+\path[draw=mnavy,fill=mblanc,line width=1.4pt,rounded corners=1.5pt] (74,17) rectangle (98,38);
+\path[draw=mnavy,fill=mnavy,line width=1.4pt,rounded corners=1.5pt] (101,17) rectangle (125,38);
+\path[draw=mnavy,fill=mblanc,line width=1.4pt,rounded corners=1.5pt] (33,42) rectangle (57,63);
+\path[draw=mnavy,fill=mblanc,line width=1.4pt,rounded corners=1.5pt] (60,42) rectangle (84,63);
+\path[draw=none,fill=morange,rounded corners=1.5pt] (87,42) rectangle (111,63);
+\path[draw=mnavy,fill=mblanc,line width=1.4pt,rounded corners=1.5pt] (114,42) rectangle (138,63);
+\path[draw=none,fill=morange,rounded corners=1.5pt] (20,67) rectangle (44,88);
+\path[draw=mnavy,fill=mnavy,line width=1.4pt,rounded corners=1.5pt] (47,67) rectangle (71,88);
+\path[draw=mnavy,fill=mblanc,line width=1.4pt,rounded corners=1.5pt] (74,67) rectangle (98,88);
+\path[draw=mnavy,fill=mblanc,line width=1.4pt,rounded corners=1.5pt] (101,67) rectangle (125,88);
+\draw[draw=morange,fill=none,line width=0.9pt] (42,29) -- (56,42);
+\draw[draw=morange,fill=none,line width=0.9pt] (69,29) -- (83,42);
+\draw[draw=morange,fill=none,line width=0.9pt] (96,29) -- (110,42);
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% A04 | Équilibre des contraintes
+\expandafter\def\csname MotifA04\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\draw[draw=mnavy,fill=none,line width=1.65pt] (42,24) -- (109,22);
+\draw[draw=mnavy,fill=none,line width=1.65pt] (42,24) -- (75,85);
+\draw[draw=mnavy,fill=none,line width=1.65pt] (109,22) -- (75,85);
+\draw[draw=morange,fill=none,line width=1.65pt] (42,24) -- (76,52);
+\draw[draw=morange,fill=none,line width=1.65pt] (109,22) -- (76,52);
+\draw[draw=morange,fill=none,line width=1.65pt] (75,85) -- (76,52);
+\path[draw=mnavy,fill=mblanc,line width=2.2pt,rounded corners=3pt] (31,13) rectangle (53,35);
+\path[draw=mnavy,fill=mblanc,line width=2.2pt,rounded corners=3pt] (98,11) rectangle (120,33);
+\path[draw=mnavy,fill=mblanc,line width=2.2pt,rounded corners=3pt] (64,74) rectangle (86,96);
+\path[draw=none,fill=mnavy] (76,52) circle[radius=15];
+\path[draw=none,fill=mblanc] (76,52) circle[radius=6];
+\path[draw=none,fill=morange] (42,24) circle[radius=3];
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% A05 | Interface commune
+\expandafter\def\csname MotifA05\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=none,fill=mnavy,rounded corners=4pt] (17,27) rectangle (79,75);
+\path[draw=mnavy,fill=mblanc,line width=2.6pt,rounded corners=4pt] (71,20) rectangle (132,68);
+\path[draw=none,fill=mblanc] (75,47) circle[radius=19];
+\path[draw=none,fill=mcyan] (75,47) circle[radius=11];
+\draw[draw=mblanc,fill=none,line width=2pt] (31,34) -- (45,34);
+\draw[draw=mblanc,fill=none,line width=2pt] (31,48) -- (45,48);
+\draw[draw=mblanc,fill=none,line width=2pt] (31,62) -- (45,62);
+\draw[draw=morange,fill=none,line width=2pt] (104,31) -- (116,31);
+\draw[draw=morange,fill=none,line width=2pt] (104,47) -- (116,47);
+\draw[draw=morange,fill=none,line width=2pt] (104,63) -- (116,63);
+\draw[draw=morange,fill=none,line width=2pt] (50,47) -- (63,47);
+\path[draw=none,fill=morange] (63,47) -- (59.2366,48.8646) -- (59.2366,45.1354) -- cycle;
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% A06 | Ossature assemblée
+\expandafter\def\csname MotifA06\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=none,fill=mnavy] (26,18) rectangle (51,49);
+\path[draw=none,fill=mnavy] (99,18) rectangle (124,49);
+\path[draw=mnavy,fill=mblanc,line width=1.7pt] (40,62) circle[radius=10];
+\path[draw=mnavy,fill=mblanc,line width=1.7pt] (54,78) circle[radius=10];
+\path[draw=mnavy,fill=mblanc,line width=1.7pt] (75,83) circle[radius=10];
+\path[draw=mnavy,fill=mblanc,line width=1.7pt] (96,78) circle[radius=10];
+\path[draw=mnavy,fill=mblanc,line width=1.7pt] (111,62) circle[radius=10];
+\draw[draw=morange,fill=none,line width=3pt] (117,46) arc[start angle=0,end angle=180,x radius=42,y radius=42];
+\draw[draw=mnavy,fill=none,line width=2pt] (106,46) arc[start angle=0,end angle=180,x radius=31,y radius=31];
+\path[draw=mnavy,fill=mblanc,line width=2.2pt] (57,16) rectangle (93,46);
+\path[draw=none,fill=morange] (75,32) circle[radius=7];
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% B01 | Chaîne de transformations
+\expandafter\def\csname MotifB01\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=none,fill=mnavy,rounded corners=2pt] (10,38) rectangle (34,62);
+\path[draw=mcyan,fill=mblanc,line width=2pt] (65,50) circle[radius=13];
+\path[draw=none,fill=morange] (94,37) -- (108,64) -- (122,37) -- cycle;
+\path[draw=none,fill=mnavy] (141,50) circle[radius=8];
+\draw[draw=mnavy,fill=none,line width=2pt] (34,50) -- (52,50);
+\path[draw=none,fill=mnavy] (52,50) -- (48.2366,51.8646) -- (48.2366,48.1354) -- cycle;
+\draw[draw=mnavy,fill=none,line width=2pt] (78,50) -- (92,50);
+\path[draw=none,fill=mnavy] (92,50) -- (88.2366,51.8646) -- (88.2366,48.1354) -- cycle;
+\draw[draw=mnavy,fill=none,line width=2pt] (123,50) -- (132,50);
+\path[draw=none,fill=mnavy] (132,50) -- (128.2366,51.8646) -- (128.2366,48.1354) -- cycle;
+\path[draw=none,fill=mblanc] (22,50) circle[radius=5];
+\path[draw=none,fill=mcyan] (65,50) circle[radius=4];
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% B02 | Relais successifs
+\expandafter\def\csname MotifB02\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=mnavy,fill=none,line width=2pt] (11,26) .. controls (40,10) and (53,40) .. (78,49) .. controls (95,63) and (106,77) .. (139,78);
+\path[draw=mnavy,fill=mblanc,line width=1.9pt] (16,26) circle[radius=7];
+\path[draw=none,fill=mcyan] (16,26) circle[radius=3.5];
+\path[draw=mnavy,fill=mblanc,line width=1.9pt] (48,29) circle[radius=9];
+\path[draw=none,fill=mcyan] (48,29) circle[radius=4.5];
+\path[draw=mnavy,fill=mblanc,line width=1.9pt] (80,49) circle[radius=11];
+\path[draw=none,fill=mcyan] (80,49) circle[radius=5.5];
+\path[draw=mnavy,fill=mblanc,line width=1.9pt] (113,72) circle[radius=14];
+\path[draw=none,fill=morange] (113,72) circle[radius=7];
+\draw[draw=morange,fill=none,line width=1.6pt] (122,77) -- (142,82);
+\path[draw=none,fill=morange] (142,82) -- (137.8967,82.8961) -- (138.8012,79.2783) -- cycle;
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% B03 | Branches réunifiées
+\expandafter\def\csname MotifB03\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=none,fill=mnavy,rounded corners=2pt] (8,41) rectangle (27,60);
+\path[draw=none,fill=morange] (136,50) circle[radius=12];
+\draw[draw=mnavy,fill=none,line width=2pt] (27,50) -- (43,50);
+\path[draw=mcyan,fill=none,line width=2.15pt] (43,50) .. controls (58,50) and (59,83) .. (86,79) .. controls (109,77) and (107,50) .. (124,50);
+\path[draw=mnavy,fill=none,line width=2.15pt] (43,50) .. controls (58,50) and (82,50) .. (124,50);
+\path[draw=morange,fill=none,line width=2.15pt] (43,50) .. controls (56,48) and (60,18) .. (86,18) .. controls (109,18) and (111,50) .. (124,50);
+\path[draw=mnavy,fill=mblanc,line width=1pt] (43,50) circle[radius=3];
+\draw[draw=mnavy,fill=none,line width=1pt] (124,50) -- (126,50);
+\path[draw=none,fill=mnavy] (126,50) -- (122.2366,51.8646) -- (122.2366,48.1354) -- cycle;
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% B04 | Filtre et sélection
+\expandafter\def\csname MotifB04\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (12,27) circle[radius=4];
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (23,42) circle[radius=4];
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (35,61) circle[radius=4];
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (20,77) circle[radius=4];
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (39,25) circle[radius=4];
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (50,74) circle[radius=4];
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (54,45) circle[radius=4];
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (46,58) circle[radius=4];
+\draw[draw=mnavy,fill=none,line width=2.2pt] (67,21) -- (67,79);
+\draw[draw=mcyan,fill=none,line width=2pt] (63,24) -- (69,24);
+\draw[draw=mcyan,fill=none,line width=2pt] (63,30) -- (69,30);
+\draw[draw=mcyan,fill=none,line width=2pt] (63,36) -- (69,36);
+\draw[draw=mcyan,fill=none,line width=2pt] (63,42) -- (69,42);
+\draw[draw=mcyan,fill=none,line width=2pt] (63,48) -- (69,48);
+\draw[draw=mcyan,fill=none,line width=2pt] (63,54) -- (69,54);
+\draw[draw=mcyan,fill=none,line width=2pt] (63,60) -- (69,60);
+\draw[draw=mcyan,fill=none,line width=2pt] (63,66) -- (69,66);
+\draw[draw=mcyan,fill=none,line width=2pt] (63,72) -- (69,72);
+\draw[draw=mcyan,fill=none,line width=2pt] (63,78) -- (69,78);
+\path[draw=none,fill=mnavy,rounded corners=2pt] (85,43) rectangle (97,57);
+\path[draw=none,fill=morange,rounded corners=2pt] (101,43) rectangle (113,57);
+\path[draw=none,fill=morange,rounded corners=2pt] (117,43) rectangle (129,57);
+\path[draw=none,fill=morange,rounded corners=2pt] (135,43) rectangle (147,57);
+\draw[draw=morange,fill=none,line width=1.6pt] (73,50) -- (79,50);
+\path[draw=none,fill=morange] (79,50) -- (75.2366,51.8646) -- (75.2366,48.1354) -- cycle;
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% B05 | Boucle de rétroaction
+\expandafter\def\csname MotifB05\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=mnavy,fill=mblanc,line width=1.9pt] (75,84) circle[radius=13];
+\path[draw=none,fill=mcyan] (75,84) circle[radius=5];
+\path[draw=mnavy,fill=mblanc,line width=1.9pt] (111,50) circle[radius=13];
+\path[draw=none,fill=morange] (111,50) circle[radius=5];
+\path[draw=mnavy,fill=mblanc,line width=1.9pt] (75,16) circle[radius=13];
+\path[draw=none,fill=mnavy] (75,16) circle[radius=5];
+\path[draw=mnavy,fill=mblanc,line width=1.9pt] (39,50) circle[radius=13];
+\path[draw=none,fill=mcyan] (39,50) circle[radius=5];
+\draw[draw=mnavy,fill=none,line width=2pt] (107.5144,59.9406) arc[start angle=17,end angle=73,x radius=34,y radius=34];
+\path[draw=none,fill=mnavy] (84.9406,82.5144) -- (87.849,79.7682) -- (88.8874,83.1646) -- cycle;
+\draw[draw=mnavy,fill=none,line width=2pt] (65.0594,82.5144) arc[start angle=107,end angle=163,x radius=34,y radius=34];
+\path[draw=none,fill=mnavy] (42.4856,59.9406) -- (45.2318,62.849) -- (41.8354,63.8874) -- cycle;
+\draw[draw=morange,fill=none,line width=2pt] (42.4856,40.0594) arc[start angle=197,end angle=253,x radius=34,y radius=34];
+\path[draw=none,fill=morange] (65.0594,17.4856) -- (62.151,20.2318) -- (61.1126,16.8354) -- cycle;
+\draw[draw=mnavy,fill=none,line width=2pt] (84.9406,17.4856) arc[start angle=287,end angle=343,x radius=34,y radius=34];
+\path[draw=none,fill=mnavy] (107.5144,40.0594) -- (104.7682,37.151) -- (108.1646,36.1126) -- cycle;
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% B06 | Distribution ramifiée
+\expandafter\def\csname MotifB06\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=none,fill=mnavy,rounded corners=2pt] (14,36) rectangle (39,65);
+\path[draw=none,fill=mblanc] (26,50) circle[radius=7];
+\path[draw=mnavy,fill=none,line width=1.6pt] (39,50) .. controls (74,50) and (79,82) .. (121,82);
+\path[draw=mcyan,fill=mblanc,line width=1.8pt] (121,82) circle[radius=9];
+\path[draw=mnavy,fill=none,line width=1.6pt] (39,50) .. controls (74,50) and (79,50) .. (127,50);
+\path[draw=mcyan,fill=mblanc,line width=1.8pt] (127,50) circle[radius=9];
+\path[draw=mnavy,fill=none,line width=1.6pt] (39,50) .. controls (74,50) and (79,18) .. (121,18);
+\path[draw=mcyan,fill=mblanc,line width=1.8pt] (121,18) circle[radius=9];
+\path[draw=none,fill=morange] (95,82) circle[radius=2];
+\path[draw=none,fill=morange] (101,50) circle[radius=2];
+\path[draw=none,fill=morange] (95,18) circle[radius=2];
+\draw[draw=mcyan,fill=none,line width=0.75pt] (132.3562,40.0414) arc[start angle=-50,end angle=50,x radius=13,y radius=13];
+\draw[draw=mcyan,fill=none,line width=0.75pt] (136.213,35.4452) arc[start angle=-50,end angle=50,x radius=19,y radius=19];
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% C01 | Dispersion autour d’un repère
+\expandafter\def\csname MotifC01\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=mvert,fill=none,line width=1.4pt] (75,50) circle[radius=36];
+\path[draw=none,fill=mvert] (49,43) circle[radius=5];
+\path[draw=none,fill=mvert] (60,68) circle[radius=3.6];
+\path[draw=none,fill=mvert] (70,48) circle[radius=3.6];
+\path[draw=none,fill=morange] (83,60) circle[radius=5];
+\path[draw=none,fill=mvert] (94,36) circle[radius=3.6];
+\path[draw=none,fill=mvert] (48,67) circle[radius=3.6];
+\path[draw=none,fill=mvert] (99,72) circle[radius=5];
+\path[draw=none,fill=mvert] (80,30) circle[radius=3.6];
+\path[draw=none,fill=morange] (65,25) circle[radius=3.6];
+\path[draw=none,fill=mvert] (104,48) circle[radius=5];
+\path[draw=none,fill=mvert] (42,25) circle[radius=3.6];
+\path[draw=none,fill=mvert] (76,75) circle[radius=3.6];
+\path[draw=none,fill=mvert] (37,55) circle[radius=5];
+\path[draw=none,fill=mvert] (113,61) circle[radius=3.6];
+\path[draw=mnavy,fill=mblanc,line width=2pt] (75,50) circle[radius=6];
+\draw[draw=mnavy,fill=none,line width=1pt] (64,50) -- (86,50);
+\draw[draw=mnavy,fill=none,line width=1pt] (75,39) -- (75,61);
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% C02 | Famille de scénarios
+\expandafter\def\csname MotifC02\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=mvert,fill=mblanc,line width=1.9pt] (20,18) circle[radius=6.7];
+\path[draw=none,fill=mvert,rounded corners=1.3pt] (34.5,13.5) rectangle (47.5,26.5);
+\path[draw=mvert,fill=mblanc,line width=1.9pt] (62,22) circle[radius=6.7];
+\path[draw=none,fill=mvert,rounded corners=1.3pt] (76.5,17.5) rectangle (89.5,30.5);
+\path[draw=mvert,fill=mblanc,line width=1.9pt] (104,19) circle[radius=6.7];
+\path[draw=none,fill=mvert,rounded corners=1.3pt] (118.5,14.5) rectangle (131.5,27.5);
+\path[draw=none,fill=mvert,rounded corners=1.3pt] (17.5,35.5) rectangle (30.5,48.5);
+\path[draw=mvert,fill=mblanc,line width=1.9pt] (45,44) circle[radius=6.7];
+\path[draw=none,fill=mvert,rounded corners=1.3pt] (59.5,32.5) rectangle (72.5,45.5);
+\path[draw=mvert,fill=mblanc,line width=1.9pt] (87,41) circle[radius=6.7];
+\path[draw=none,fill=mvert,rounded corners=1.3pt] (101.5,36.5) rectangle (114.5,49.5);
+\path[draw=mvert,fill=mblanc,line width=1.9pt] (129,38) circle[radius=6.7];
+\path[draw=mvert,fill=mblanc,line width=1.9pt] (21,59) circle[radius=6.7];
+\path[draw=none,fill=mvert,rounded corners=1.3pt] (35.5,54.5) rectangle (48.5,67.5);
+\path[draw=mvert,fill=mblanc,line width=1.9pt] (63,63) circle[radius=6.7];
+\path[draw=none,fill=morange] (84,58) circle[radius=9];
+\path[draw=mvert,fill=mblanc,line width=1.9pt] (105,60) circle[radius=6.7];
+\path[draw=none,fill=mvert,rounded corners=1.3pt] (119.5,55.5) rectangle (132.5,68.5);
+\path[draw=none,fill=mvert,rounded corners=1.3pt] (18.5,76.5) rectangle (31.5,89.5);
+\path[draw=mvert,fill=mblanc,line width=1.9pt] (46,78) circle[radius=6.7];
+\path[draw=none,fill=mvert,rounded corners=1.3pt] (60.5,73.5) rectangle (73.5,86.5);
+\path[draw=mvert,fill=mblanc,line width=1.9pt] (88,82) circle[radius=6.7];
+\path[draw=none,fill=mvert,rounded corners=1.3pt] (102.5,77.5) rectangle (115.5,90.5);
+\path[draw=mvert,fill=mblanc,line width=1.9pt] (130,79) circle[radius=6.7];
+\path[draw=mnavy,fill=none,line width=0.85pt,rounded corners=2pt] (16,12) rectangle (144,92);
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% C03 | Centre mobile
+\expandafter\def\csname MotifC03\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=mvert,fill=none,line width=1.8pt] (76,50) circle[radius=41];
+\path[draw=mnavy,fill=none,line width=1.8pt] (79,51.5) circle[radius=34];
+\path[draw=mvert,fill=none,line width=1.8pt] (82,53) circle[radius=27];
+\path[draw=mnavy,fill=none,line width=1.8pt] (85,54.5) circle[radius=20];
+\path[draw=mvert,fill=none,line width=1.8pt] (88,56) circle[radius=13];
+\path[draw=none,fill=morange] (89,55) circle[radius=7];
+\draw[draw=morange,fill=none,line width=1pt] (33,18) -- (40,12);
+\draw[draw=morange,fill=none,line width=1pt] (41,18) -- (48,12);
+\draw[draw=morange,fill=none,line width=1pt] (49,18) -- (56,12);
+\draw[draw=morange,fill=none,line width=1pt] (57,18) -- (64,12);
+\draw[draw=morange,fill=none,line width=1pt] (65,18) -- (72,12);
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% C04 | Domaines superposés
+\expandafter\def\csname MotifC04\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=mvert,fill=none,line width=2pt] (32,55) .. controls (32,68.5) and (46.5,73) .. (61,73) .. controls (84.2,73) and (90,67.6) .. (90,55) .. controls (90,38.8) and (78.4,37) .. (61,37) .. controls (37.8,37) and (32,46) .. (32,55) -- cycle;
+\path[draw=mnavy,fill=none,line width=2pt] (54,56) .. controls (54,73.25) and (71,79) .. (88,79) .. controls (115.2,79) and (122,72.1) .. (122,56) .. controls (122,35.3) and (108.4,33) .. (88,33) .. controls (60.8,33) and (54,44.5) .. (54,56) -- cycle;
+\path[draw=mvert,fill=none,line width=2pt] (40,38) .. controls (40,50.75) and (60,55) .. (80,55) .. controls (112,55) and (120,49.9) .. (120,38) .. controls (120,22.7) and (104,21) .. (80,21) .. controls (48,21) and (40,29.5) .. (40,38) -- cycle;
+\path[draw=mnavy,fill=none,line width=2pt] (23,38) .. controls (23,53) and (38,58) .. (53,58) .. controls (77,58) and (83,52) .. (83,38) .. controls (83,20) and (71,18) .. (53,18) .. controls (29,18) and (23,28) .. (23,38) -- cycle;
+\path[draw=none,fill=morange] (75,47) circle[radius=5];
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% C05 | Perturbation locale
+\expandafter\def\csname MotifC05\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=none,fill=mvert] (15,25) circle[radius=4];
+\path[draw=none,fill=mnavy] (15,54.2074) circle[radius=4];
+\path[draw=none,fill=mvert] (15,79.5465) circle[radius=4];
+\path[draw=none,fill=mvert] (33,28.2211) circle[radius=4];
+\path[draw=none,fill=mnavy] (33,54.9583) circle[radius=4];
+\path[draw=none,fill=mvert] (33,77.1369) circle[radius=4];
+\path[draw=none,fill=mvert] (51,29.9272) circle[radius=4];
+\path[draw=none,fill=mnavy] (51,53.3773) circle[radius=4];
+\path[draw=none,fill=mvert] (51,73.7223) circle[radius=4];
+\path[draw=none,fill=mvert] (69,29.316) circle[radius=4];
+\path[draw=none,fill=mnavy] (69,50.2079) circle[radius=4];
+\path[draw=none,fill=mvert] (69,70.9086) circle[radius=4];
+\path[draw=none,fill=mvert] (87,26.6749) circle[radius=4];
+\path[draw=none,fill=mnavy] (87,46.9407) circle[radius=4];
+\path[draw=none,fill=mvert] (87,70.0192) circle[radius=4];
+\path[draw=none,fill=mvert] (105,23.2461) circle[radius=6];
+\path[draw=none,fill=morange] (105,45.1123) circle[radius=6];
+\path[draw=none,fill=mvert] (105,71.4723) circle[radius=6];
+\path[draw=none,fill=mvert] (123,20.6421) circle[radius=4];
+\path[draw=none,fill=mnavy] (123,45.5827) circle[radius=4];
+\path[draw=none,fill=mvert] (123,74.5846) circle[radius=4];
+\path[draw=none,fill=mvert] (141,20.0877) circle[radius=4];
+\path[draw=none,fill=mnavy] (141,48.1306) circle[radius=4];
+\path[draw=none,fill=mvert] (141,77.8922) circle[radius=4];
+\draw[draw=mvert,fill=none,line width=1pt] (95,70) arc[start angle=90,end angle=180,x radius=20,y radius=20];
+\draw[draw=mvert,fill=none,line width=1pt] (95,77) arc[start angle=90,end angle=180,x radius=27,y radius=27];
+\draw[draw=mvert,fill=none,line width=1pt] (95,84) arc[start angle=90,end angle=180,x radius=34,y radius=34];
+\draw[draw=mvert,fill=none,line width=1pt] (95,91) arc[start angle=90,end angle=180,x radius=41,y radius=41];
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% C06 | Éventail de possibilités
+\expandafter\def\csname MotifC06\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\draw[draw=mnavy,fill=none,line width=1.5pt] (29,29) -- (126.8148,49.7912);
+\path[draw=none,fill=mvert] (126.8148,49.7912) circle[radius=3];
+\draw[draw=mvert,fill=none,line width=1.5pt] (29,29) -- (135.8436,65.7892);
+\draw[draw=mvert,fill=none,line width=1.5pt] (29,29) -- (126.0698,76.3441);
+\path[draw=none,fill=mvert] (126.0698,76.3441) circle[radius=3];
+\draw[draw=mnavy,fill=none,line width=1.5pt] (29,29) -- (115.3831,85.0978);
+\draw[draw=mvert,fill=none,line width=1.5pt] (29,29) -- (117.8612,103.5634);
+\path[draw=none,fill=mvert] (117.8612,103.5634) circle[radius=3];
+\draw[draw=mvert,fill=none,line width=1.5pt] (29,29) -- (104.7018,110.1803);
+\draw[draw=mnavy,fill=none,line width=1.5pt] (29,29) -- (91.3052,114.7558);
+\path[draw=none,fill=morange] (91.3052,114.7558) circle[radius=3];
+\draw[draw=mvert,fill=none,line width=1.5pt] (29,29) -- (77.9658,117.3366);
+\draw[draw=mvert,fill=none,line width=1.5pt] (29,29) -- (71.7052,134.699);
+\path[draw=none,fill=mvert] (71.7052,134.699) circle[radius=3];
+\draw[draw=mnavy,fill=none,line width=1.5pt] (29,29) -- (57.2113,134.2859);
+\draw[draw=mvert,fill=none,line width=1.5pt] (29,29) -- (43.474,131.9879);
+\path[draw=none,fill=mvert] (43.474,131.9879) circle[radius=3];
+\path[draw=none,fill=mnavy] (29,29) circle[radius=10];
+\draw[draw=morange,fill=none,line width=2.7pt] (78.8855,39.6035) arc[start angle=12,end angle=87,x radius=51,y radius=51];
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% D01 | Contributions coordonnées
+\expandafter\def\csname MotifD01\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\draw[draw=mnavy,fill=none,line width=1.9pt] (124,50) -- (91,50);
+\path[draw=morange,fill=mblanc,line width=1.9pt] (124,50) circle[radius=8];
+\draw[draw=mnavy,fill=none,line width=1.9pt] (99.5,82.909) -- (83,63.8564);
+\path[draw=morange,fill=mblanc,line width=1.9pt] (99.5,82.909) circle[radius=8];
+\draw[draw=mnavy,fill=none,line width=1.9pt] (50.5,82.909) -- (67,63.8564);
+\path[draw=morange,fill=mblanc,line width=1.9pt] (50.5,82.909) circle[radius=8];
+\draw[draw=mnavy,fill=none,line width=1.9pt] (26,50) -- (59,50);
+\path[draw=morange,fill=mblanc,line width=1.9pt] (26,50) circle[radius=8];
+\draw[draw=mnavy,fill=none,line width=1.9pt] (50.5,17.091) -- (67,36.1436);
+\path[draw=morange,fill=mblanc,line width=1.9pt] (50.5,17.091) circle[radius=8];
+\draw[draw=mnavy,fill=none,line width=1.9pt] (99.5,17.091) -- (83,36.1436);
+\path[draw=morange,fill=mblanc,line width=1.9pt] (99.5,17.091) circle[radius=8];
+\path[draw=none,fill=morange] (75,50) circle[radius=19];
+\path[draw=none,fill=mblanc] (75,50) circle[radius=9];
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% D02 | Arbitrage vers une sortie
+\expandafter\def\csname MotifD02\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=mnavy,fill=mblanc,line width=1.7pt] (18,23) circle[radius=7];
+\path[draw=morange,fill=none,line width=1.8pt] (26,23) .. controls (55,23) and (56,50) .. (86,50);
+\path[draw=mnavy,fill=mnavy,line width=1.7pt] (18,50) circle[radius=7];
+\path[draw=mnavy,fill=none,line width=1.8pt] (26,50) .. controls (55,50) and (56,50) .. (86,50);
+\path[draw=mnavy,fill=mblanc,line width=1.7pt] (18,78) circle[radius=7];
+\path[draw=morange,fill=none,line width=1.8pt] (26,78) .. controls (55,78) and (56,50) .. (86,50);
+\path[draw=none,fill=mnavy,rounded corners=2pt] (85,36) rectangle (102,64);
+\draw[draw=morange,fill=none,line width=2.8pt] (102,50) -- (119,50);
+\draw[draw=morange,fill=none,line width=2.8pt] (119,50) -- (139,50);
+\path[draw=none,fill=morange] (139,50) -- (135.2366,51.8646) -- (135.2366,48.1354) -- cycle;
+\path[draw=none,fill=mblanc] (92,50) circle[radius=4];
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% D03 | Intersection des exigences
+\expandafter\def\csname MotifD03\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=mnavy,fill=none,line width=2pt] (59,56) circle[radius=28];
+\path[draw=morange,fill=none,line width=2pt] (91,56) circle[radius=28];
+\path[draw=mnavy,fill=none,line width=2pt] (75,34) circle[radius=28];
+\path[draw=none,fill=morange,rounded corners=1.5pt] (69,48) rectangle (82,61);
+\path[draw=none,fill=mblanc] (75,54) circle[radius=4];
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% D04 | Alignement progressif
+\expandafter\def\csname MotifD04\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\begin{scope}
+\begin{scope}[shift={(22,45)}]
+\begin{scope}[rotate=40]
+\path[draw=mnavy,fill=mblanc,line width=2pt,rounded corners=1pt] (-5,-17) rectangle (5,17);
+\end{scope}
+\end{scope}
+\end{scope}
+\begin{scope}
+\begin{scope}[shift={(50,45)}]
+\begin{scope}[rotate=29]
+\path[draw=mnavy,fill=mblanc,line width=2pt,rounded corners=1pt] (-5,-17) rectangle (5,17);
+\end{scope}
+\end{scope}
+\end{scope}
+\begin{scope}
+\begin{scope}[shift={(78,45)}]
+\begin{scope}[rotate=18]
+\path[draw=mnavy,fill=mblanc,line width=2pt,rounded corners=1pt] (-5,-17) rectangle (5,17);
+\end{scope}
+\end{scope}
+\end{scope}
+\begin{scope}
+\begin{scope}[shift={(106,45)}]
+\begin{scope}[rotate=7]
+\path[draw=mnavy,fill=mblanc,line width=2pt,rounded corners=1pt] (-5,-17) rectangle (5,17);
+\end{scope}
+\end{scope}
+\end{scope}
+\path[draw=none,fill=morange,rounded corners=1pt] (127,30) rectangle (139,70);
+\draw[draw=morange,fill=none,line width=1.3pt] (22,16) -- (142,16);
+\path[draw=none,fill=morange] (142,16) -- (138.2366,17.8646) -- (138.2366,14.1354) -- cycle;
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% D05 | Approche itérative
+\expandafter\def\csname MotifD05\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (119.1656,66.0749) circle[radius=8];
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (99.1571,85.8144) circle[radius=7.43];
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (73.625,89.376) circle[radius=6.86];
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (53.0825,78.0532) circle[radius=6.29];
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (44.4319,58.7653) circle[radius=5.72];
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (48.6886,40.4234) circle[radius=5.15];
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (61.4675,29.9373) circle[radius=4.58];
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (75.7119,29.6124) circle[radius=4.01];
+\path[draw=mnavy,fill=mblanc,line width=1.4pt] (85.22,36.919) circle[radius=3.44];
+\path[draw=none,fill=morange] (87.3041,46.4718) circle[radius=2.87];
+\path[draw=none,fill=morange] (83.4572,53.0782) circle[radius=2.3];
+\path[draw=none,fill=morange] (75,50) circle[radius=7];
+\draw[draw=mnavy,fill=none,line width=1.25pt] (119.0166,40.644) arc[start angle=-12,end angle=208,x radius=45,y radius=45];
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+%% D06 | Décision collégiale
+\expandafter\def\csname MotifD06\endcsname{%
+\begin{scope}
+\begin{scope}[shift={(0,0)}]
+\begin{scope}[xscale=1,yscale=1]
+\foreach \dx in {8,23,...,143} {\foreach \dy in {7,22,...,97} {\fill[mpoint] (\dx,\dy) circle[radius=0.65];}}
+\draw[draw=mnavy,fill=none,line width=1.5pt] (35,75) -- (75,50);
+\path[draw=mnavy,fill=mblanc,line width=1.6pt,rounded corners=3pt] (25,65) rectangle (45,85);
+\path[draw=none,fill=mvert] (35,75) circle[radius=4];
+\draw[draw=mnavy,fill=none,line width=1.5pt] (115,75) -- (75,50);
+\path[draw=mnavy,fill=mblanc,line width=1.6pt,rounded corners=3pt] (105,65) rectangle (125,85);
+\path[draw=none,fill=mvert] (115,75) circle[radius=4];
+\draw[draw=mnavy,fill=none,line width=1.5pt] (35,25) -- (75,50);
+\path[draw=mnavy,fill=mblanc,line width=1.6pt,rounded corners=3pt] (25,15) rectangle (45,35);
+\path[draw=none,fill=morange] (35,25) circle[radius=4];
+\draw[draw=mnavy,fill=none,line width=1.5pt] (115,25) -- (75,50);
+\path[draw=mnavy,fill=mblanc,line width=1.6pt,rounded corners=3pt] (105,15) rectangle (125,35);
+\path[draw=none,fill=morange] (115,25) circle[radius=4];
+\path[draw=none,fill=morange] (75,50) circle[radius=16];
+\path[draw=none,fill=mblanc,rounded corners=2pt] (68,43) rectangle (82,57);
+\draw[draw=mnavy,fill=none,line width=1pt] (105.3767,62.8941) arc[start angle=23,end angle=153,x radius=33,y radius=33];
+\draw[draw=mnavy,fill=none,line width=1pt] (44.853,36.5777) arc[start angle=204,end angle=336,x radius=33,y radius=33];
+\end{scope}
+\end{scope}
+\end{scope}
+}
+
+
+% Typographie et cadres de pages
+\newcommand{\Texte}[5]{\node[anchor=north west,inner sep=0pt,text=#4,font={\fontsize{#5pt}{#5pt}\selectfont}] at (#1,#2) {#3};}
+\newcommand{\MotifCarte}[7]{%
+% #1 = Y haut ; #2 = identifiant ; #3 = rang ; #4 titre ; #5 sens ; #6 usage ; #7 macro dessin
+  \pgfmathsetmacro{\ybas}{#1-186}
+  \fill[mblanc,rounded corners=10pt] (48,\ybas) rectangle (547.28,#1-3);
+  \draw[mligne,line width=.6pt,rounded corners=10pt] (48,\ybas) rectangle (547.28,#1-3);
+  \fill[mpapier,rounded corners=8pt] (57,\ybas+8) rectangle (309,\ybas+175);
+  \begin{scope}[shift={(70,\ybas+16)},scale=1.44]
+    #7
+  \end{scope}
+  \node[anchor=west,inner sep=0pt,text=morange,font={\bfseries\fontsize{9pt}{10pt}\selectfont}] at (327,#1-31) {#2 / #3};
+  \node[anchor=west,inner sep=0pt,text=mnavy,font={\displayfont\bfseries\fontsize{16pt}{17pt}\selectfont}] at (327,#1-60) {#4};
+  \node[anchor=north west,inner sep=0pt,text width=204pt,align=left,text=mencre,font={\fontsize{9.3pt}{13.7pt}\selectfont}] at (327,#1-74) {#5};
+  \draw[mligne,line width=.6pt] (327,\ybas+42)--(527,\ybas+42);
+  \node[anchor=west,inner sep=0pt,text=mgris,font={\itshape\fontsize{8.5pt}{10pt}\selectfont}] at (327,\ybas+23) {#6};
+}
+\newcommand{\DebutPage}{\null\vspace*{-\baselineskip}\begin{tikzpicture}[remember picture,overlay,shift={(current page.south west)},x=1pt,y=1pt]}
+\newcommand{\FinPage}{\end{tikzpicture}\clearpage}
+
+

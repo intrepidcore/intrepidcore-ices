@@ -91,10 +91,10 @@
   "ices_envelope": {
     "alg": "Ed25519",
     "digest_alg": "SHA3-256",
-    "digest": "5d8bb3f2361302392fe735307a6ca9462fadd27c86bcb11d2895c38c955fff62",
-    "sig": "ZiyTxoQsq9ZryWR9PgjyqypNHgxUzl5WH9teUgzTisxJIVrOa23gx/CySJdl1mDPZIC+oCWCf0n8qGUfAespBg==",
-    "pubkey": "DWzldgM4Ymf/vUL8di31VW4ebk5/US7tu8UG6WgIZqQ=",
+    "digest": "2028f4be7a414290a3f69884489f734bc95ec787d67cd9ab25e9c324f3e40331",
+    "sig": "gn+Eq4YFjwkI+yj6MQr90bKRCeyhcq02OAzpFY93/kiYN0she9cRHkyBkqv54yFkt/ddE+SAakjnCc9Om6TFAA==",
+    "pubkey": "zO6uRfxEy6mSTX/niFkMJOB38p4OW4c1UHahv4qhk+k=",
     "signed_at": "2026-06-30T10:00:01Z",
-    "key_id": "fde-demo-01"
+    "key_id": "demo-aep-01"
   }
 }

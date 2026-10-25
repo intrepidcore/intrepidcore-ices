@@ -1,0 +1,939 @@
+% !TeX program = xelatex
+%% SPDX-License-Identifier: CC-BY-4.0
+%% SPDX-FileCopyrightText: 2026 Serge TABE DJATO
+%% ============================================================
+%% ICES, le sceau de responsabilité de l'ingénierie publique
+%% Livre blanc IntrepidCore et IntrepidLab, version 4.0
+%% Mis aux normes du guide de rédaction v7.0 (couverture double marque,
+%% métadonnées, pagination, citations IEEE, style éditorial ambiance Marque).
+%% Remplace le livre blanc v3.0 (juillet 2026).
+%% Compilation : xelatex, biber, xelatex, xelatex.
+%% ============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[a4paper,top=2.6cm,bottom=2.8cm,left=2.6cm,right=2.6cm,headsep=1cm,footskip=1.2cm]{geometry}
+\usepackage[french]{babel}
+\usepackage{csquotes}
+\usepackage{fontspec}
+\usepackage{microtype}
+\IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{TeX Gyre Termes}}
+\IfFontExistsTF{Consolas}{\setmonofont{Consolas}[Scale=MatchLowercase]}{\setmonofont{TeX Gyre Cursor}[Scale=MatchLowercase]}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{fancyvrb}
+\usepackage{needspace}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{tikz}
+\usetikzlibrary{calc,arrows.meta,positioning,shapes.geometric,patterns,fadings,decorations.pathmorphing}
+\tikzfading[name=ombredouce,inner color=transparent!0,outer color=transparent!100]
+\usepackage[pdfpagelabels,plainpages=false]{hyperref}
+\usepackage[style=ieee,backend=biber]{biblatex}
+\addbibresource{ices-livre-blanc-bibliographie.bib}
+\graphicspath{{../assets/}{figures/}}
+
+%% ── Couleurs (palette de production, guide v7.0) ────────────
+\definecolor{intrepid}{RGB}{0,57,107}
+\definecolor{accent}{RGB}{213,93,36}
+\definecolor{cyanIC}{RGB}{0,196,212}
+\definecolor{vertAtlas}{RGB}{64,145,108}
+\definecolor{vertLab}{RGB}{112,186,147}
+\definecolor{rouge}{RGB}{198,40,40}
+\definecolor{grisfonce}{RGB}{60,60,60}
+\definecolor{grisclair}{RGB}{120,120,120}
+\definecolor{rowgray}{RGB}{242,242,240}
+\definecolor{papier}{RGB}{242,238,230}
+\definecolor{papierfonce}{RGB}{225,219,205}
+
+\hypersetup{hidelinks, pdflang={fr},
+  pdfauthor={Serge TABE DJATO},
+  pdftitle={ICES, le sceau de responsabilité de l'ingénierie publique, version 4.0},
+  pdfsubject={Standard ouvert de scellement cryptographique des notes de calcul d'ingénierie}}
+
+%% ── Texture papier et grille de disques de couverture (guide v7.0) ──
+\newcommand{\papertexture}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[papier] (current page.south west) rectangle (current page.north east);
+    \foreach \i in {1,...,420}{
+      \pgfmathsetseed{\i}
+      \pgfmathsetmacro{\rx}{rnd*210}
+      \pgfmathsetmacro{\ry}{rnd*297}
+      \pgfmathsetmacro{\ro}{0.06+0.10*rnd}
+      \fill[papierfonce,opacity=\ro] ([xshift=\rx mm,yshift=\ry mm]current page.south west) circle (0.35pt);
+    }
+    \foreach \y in {12,...,280}{
+      \pgfmathsetseed{\y+900}
+      \pgfmathsetmacro{\op}{0.02+0.02*rnd}
+      \draw[papierfonce,opacity=\op,line width=0.25pt] ([yshift=\y mm]current page.south west) -- ([yshift=\y mm]current page.south east);
+    }
+  \end{tikzpicture}%
+}
+\pgfkeys{/cdots/.cd,
+  radius/.initial=3.0, pitch/.initial=8.5, angle/.initial=40,
+  ytop/.initial=148.5, ybottom/.initial=-8, fade/.initial=40,
+  color/.initial=intrepid, tmin/.initial=8, tmax/.initial=34, calm/.initial=0.88,
+}
+\newcommand{\cdv}[1]{\pgfkeysvalueof{/cdots/#1}}
+\newcommand{\cdcalm}[6]{%
+  \pgfmathsetmacro{\cdx}{min(#5,max((#1)-(\X),max(0,(\X)-(#3))))}%
+  \pgfmathsetmacro{\cdy}{min(#5,max((#2)-(\Y),max(0,(\Y)-(#4))))}%
+  \pgfmathsetmacro{\cdd}{sqrt(\cdx*\cdx+\cdy*\cdy)}%
+  \pgfmathsetmacro{\cdg}{max(0,1-\cdd/#5)}%
+  \pgfmathsetmacro{\cdg}{#6*\cdg*\cdg*(3-2*\cdg)}%
+}
+\newcommand{\coverdots}[1][]{%
+  \pgfkeys{/cdots/.cd,#1}%
+  \begin{tikzpicture}[remember picture,overlay]
+    \foreach \i in {-34,...,34}{%
+      \foreach \j in {-34,...,34}{%
+        \pgfmathsetmacro{\X}{105 + \cdv{pitch}*(\i*cos(\cdv{angle}) - \j*sin(\cdv{angle}))}%
+        \pgfmathsetmacro{\Y}{((\cdv{ytop})+(\cdv{ybottom}))/2 + \cdv{pitch}*(\i*sin(\cdv{angle}) + \j*cos(\cdv{angle}))}%
+        \pgfmathparse{((\X)>-6)&&((\X)<216)&&((\Y)>(\cdv{ybottom}))&&((\Y)<(\cdv{ytop}))}%
+        \ifdim\pgfmathresult pt>0pt
+          \pgfmathsetmacro{\s}{min(1,((\cdv{ytop})-(\Y))/(\cdv{fade}))}%
+          \pgfmathsetmacro{\s}{\s*\s*(3-2*\s)}%
+          \ifdim\s pt>0.12pt
+            \cdcalm{22}{66}{192}{128}{20}{\cdv{calm}}\let\gA\cdg
+            \cdcalm{22}{16}{98}{32}{13}{\cdv{calm}}\let\gB\cdg
+            \pgfmathsetmacro{\ga}{max(\gA,\gB)}%
+            \pgfmathsetmacro{\r}{\cdv{radius}*\s*(1-0.22*\ga)}%
+            \pgfmathsetmacro{\t}{0.55*\X/210 + 0.45*((\cdv{ytop})-(\Y))/((\cdv{ytop})-(\cdv{ybottom}))}%
+            \pgfmathtruncatemacro{\pct}{\cdv{tmin} + (\cdv{tmax}-\cdv{tmin})*min(1,max(0,\t))*(1-0.55*\ga)}%
+            \colorlet{cc}{\cdv{color}!\pct!papier}%
+            \pgfmathtruncatemacro{\pcttr}{76+18*\ga}%
+            \pgfmathsetmacro{\so}{0.13*(1-0.6*\ga)}%
+            \coordinate (c) at ([xshift=\X mm,yshift=\Y mm]current page.south west);
+            \ifdim\r mm>0.9mm
+              \fill[black,opacity=\so,path fading=ombredouce]
+                ([shift={(0.55*\r mm,-0.85*\r mm)}]c) circle (1.35*\r mm);
+            \fi
+            \fill[cc!\pcttr!black] ([shift={(-0.07*\r mm,-0.13*\r mm)}]c) circle (\r mm);
+            \shade[top color=cc!70!white,bottom color=cc!96!black,shading angle=35]
+              (c) circle (\r mm);
+            \draw[white,opacity=0.55,line width=0.22pt]
+              ([shift={(115:0.93*\r mm)}]c) arc (115:195:0.93*\r mm);
+          \fi
+        \fi
+      }%
+    }%
+  \end{tikzpicture}%
+}
+\newcommand{\coverstyle}[1]{\csname coverstyle@#1\endcsname}
+\expandafter\newcommand\csname coverstyle@normatif\endcsname{\coverdots}
+\expandafter\newcommand\csname coverstyle@strategie\endcsname{\coverdots[color=accent,radius=3.6,pitch=10,angle=30,tmax=30]}
+\expandafter\newcommand\csname coverstyle@technique\endcsname{\coverdots[color=cyanIC,radius=2.4,pitch=7,angle=45,tmax=40]}
+\expandafter\newcommand\csname coverstyle@recherche\endcsname{\coverdots[color=vertLab,radius=2.8,pitch=8,angle=35,tmax=38]}
+
+%% Style éditorial, ambiance Marque (guide v7.0) : motifs de l'Atlas et ouvertures de partie
+\input{ic-editorial}
+\renewcommand{\IEopener}[3]{% étiquette, titre, motif : pied de page propre à ce document
+  \clearpage\thispagestyle{empty}\papertexture
+  \begin{tikzpicture}[remember picture,overlay,shift={(current page.center)}]
+    \begin{scope}[shift={(0,6.9cm)},x=1pt,y=1pt,scale=2.55]
+      \begin{scope}[shift={(-75,-50)}]
+        \begin{scope}\clip (-6,-6) rectangle (156,106);\Motif{#3}\end{scope}
+      \end{scope}
+    \end{scope}
+    \node[align=center,text width=14cm,text=morange] at (0,0.2)
+      {\ttfamily\fontsize{10}{12}\selectfont\MakeUppercase{#1}};
+    \node[align=center,text width=14.5cm,text=mnavy,execute at begin node={\hyphenpenalty=10000 \exhyphenpenalty=10000 }] at (0,-1.9)
+      {\fontsize{30}{35}\selectfont\bfseries #2};
+    \draw[mnavy,line width=0.5pt] (-8.2,-10.2) -- (8.2,-10.2);
+    \node[anchor=west,text=mgris] at (-8.2,-10.8) {\ttfamily\fontsize{7.5}{9}\selectfont LIVRE BLANC ICES \textperiodcentered\ VERSION 4.0};
+    \node[anchor=east,text=mgris] at (8.2,-10.8) {\ttfamily\fontsize{7.5}{9}\selectfont MOTIF #3 \textperiodcentered\ \MakeUppercase{\IEname{#3}}};
+  \end{tikzpicture}\clearpage}
+
+%% Logos de couverture : taille fixe (guide v7.0, tableau 9)
+\newcommand{\coverlogocore}{\includegraphics[trim=426bp 856bp 642bp 856bp,clip,width=4.04cm]{logo}}
+\newcommand{\coverlogolab}{\includegraphics[width=4.04cm]{logo_intrepidlab}}
+\newcommand{\mylogo}{\includegraphics[height=1.9cm]{logo}}
+\newcommand{\headerblock}{%
+  \noindent
+  \begin{minipage}[c]{0.45\linewidth}\mylogo\end{minipage}%
+  \hfill
+  \begin{minipage}[c]{0.52\linewidth}%
+    \raggedleft
+    {\small\color{intrepid}\textit{Innover localement. Impacter globalement.}}\\[3pt]%
+    {\small\color{intrepid}Build intelligent engineering for African infrastructure.}\\[3pt]%
+    {\footnotesize\color{grisclair}\ttfamily contact@intrepidcore.io}%
+  \end{minipage}%
+  \par\vspace{5pt}\rule{\linewidth}{1pt}\vspace{0.35cm}%
+}
+
+%% ── Encadrés et figures ─────────────────────────────────────
+\newtcolorbox{icesbox}[2][]{
+  enhanced, colback=#2!8!white, colframe=#2, coltitle=white, boxrule=0.6pt,
+  left=7pt, right=7pt, top=6pt, bottom=6pt,
+  fonttitle=\bfseries\small, title={#1}}
+\newcommand{\fig}[5]{% fichier, largeur, étiquette, légende, texte alternatif
+  \begin{figure}[H]\centering
+    \includegraphics[width=#2\linewidth,alt={#5}]{#1}
+    \caption{#4}\label{#3}
+  \end{figure}}
+\DefineVerbatimEnvironment{code}{Verbatim}{fontsize=\scriptsize,frame=single,rulecolor=\color{intrepid!40},
+  formatcom=\color{grisfonce},xleftmargin=2pt,xrightmargin=2pt,framesep=4pt}
+\newcommand{\aconfirmer}{\textbf{\color{rouge}À CONFIRMER}}
+
+%% ── Structure des titres ─────────────────────────────────────
+\setlength{\parindent}{0pt}\setlength{\parskip}{6pt plus 1pt minus 0.5pt}
+\titleformat{\section}{\normalfont\fontsize{14}{16}\bfseries\color{intrepid}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\normalfont\fontsize{12}{14}\bfseries\color{accent}}{\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}{\normalfont\fontsize{11}{13}\bfseries\color{grisfonce}}{\thesubsubsection}{0.5em}{}
+\titlespacing{\section}{0pt}{16pt}{7pt}
+\titlespacing{\subsection}{0pt}{12pt}{5pt}
+\titlespacing{\subsubsection}{0pt}{9pt}{4pt}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{2}
+\setlist{leftmargin=1.4em,itemsep=2pt,topsep=3pt}
+\titlecontents{part}[0pt]{\addvspace{10pt}\bfseries\color{intrepid}}{\contentslabel{4.6em}}{\hspace*{-4.6em}}{\hfill\contentspage}
+\titlecontents{section}[0pt]{\addvspace{2pt}}{\contentslabel{2.4em}}{\hspace*{-2.4em}}{\titlerule*[0.6pc]{.}\contentspage}
+\titlecontents{subsection}[2.4em]{}{\contentslabel{2.8em}}{\hspace*{-2.8em}}{\titlerule*[0.6pc]{.}\contentspage}
+
+%% ── En-têtes et pieds de page ────────────────────────────────
+\fancypagestyle{liminaire}{\fancyhf{}%
+  \fancyhead[L]{\small\color{intrepid}\textsc{IntrepidCore} \textemdash\ ICES, livre blanc \textemdash\ PUBLIC}%
+  \fancyhead[R]{\small\thepage}%
+  \fancyfoot[C]{\small\textit{PUBLIC \textemdash\ Licence CC BY 4.0 \textemdash\ Serge TABE DJATO, 2026}}%
+  \renewcommand{\headrulewidth}{0.4pt}\renewcommand{\footrulewidth}{0.4pt}}
+\fancypagestyle{corps}{\fancyhf{}%
+  \fancyhead[L]{\small\color{intrepid}\textsc{IntrepidCore} \textemdash\ ICES, livre blanc \textemdash\ PUBLIC}%
+  \fancyhead[R]{\small\thepage\ / \pageref{LastBody}}%
+  \fancyfoot[C]{\small\textit{PUBLIC \textemdash\ Licence CC BY 4.0 \textemdash\ Serge TABE DJATO, 2026}}%
+  \renewcommand{\headrulewidth}{0.4pt}\renewcommand{\footrulewidth}{0.4pt}}
+\pagestyle{liminaire}
+
+%% ════════════════════════════════════════════════════════════
+\begin{document}
+\selectlanguage{french}
+
+%% ── COUVERTURE, double marque : IntrepidCore et IntrepidLab ──
+\thispagestyle{empty}\papertexture
+\coverstyle{recherche}
+\begin{tikzpicture}[remember picture,overlay]
+  \node[anchor=north west,inner sep=0pt,xshift=2.4cm,yshift=-3.0cm] at (current page.north west) {\coverlogocore};
+  \node[anchor=north east,inner sep=0pt,xshift=-2.4cm,yshift=-3.0cm] at (current page.north east) {\coverlogolab};
+  \draw[intrepid,line width=0.6pt] ([yshift=6.4cm]current page.south west) -- ([yshift=6.4cm]current page.south east);
+  \node[anchor=south west,xshift=2.4cm,yshift=6.9cm,align=left,text width=16cm] at (current page.south west)
+    {\fontsize{13}{16}\selectfont\color{accent}\textit{Lier cryptographiquement chaque décision d'infrastructure à son auteur.}};
+  \node[anchor=south west,xshift=2.4cm,yshift=8.0cm,align=left,text width=16.5cm] at (current page.south west)
+    {\fontsize{34}{40}\selectfont\bfseries\color{intrepid} ICES\\[2pt] Le sceau de responsabilité\\[2pt] de l'ingénierie publique};
+  \node[anchor=south west,xshift=2.4cm,yshift=1.7cm,align=left] at (current page.south west)
+    {\ttfamily\footnotesize\color{intrepid}VERSION 4.0 \textemdash\ 25 OCTOBRE 2026\\[2pt]\color{grisclair}PUBLIC \textperiodcentered\ EN RELECTURE\\[2pt]CC BY 4.0 \textperiodcentered\ SERGE TABE DJATO};
+\end{tikzpicture}
+\newpage
+\pagenumbering{roman}
+
+%% ── PAGE DE TITRE INTERNE ────────────────────────────────────
+\thispagestyle{empty}
+\headerblock
+\begin{center}
+  {\fontsize{18}{21}\bfseries\color{intrepid} ICES, LE SCEAU DE RESPONSABILITÉ\\ DE L'INGÉNIERIE PUBLIQUE}\\[6pt]
+  {\fontsize{12}{15}\bfseries\color{accent} Spécification et doctrine d'un standard ouvert de scellement cryptographique}\\[6pt]
+  {\normalsize Livre blanc \textperiodcentered\ version 4.0 \textperiodcentered\ 25 octobre 2026}
+\end{center}
+\vspace{2pt}
+{\small\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\linewidth}{@{}>{\bfseries}l X >{\bfseries}l X@{}}
+\toprule
+Identifiant & IC-ICES-WP-001 & Statut & \texttt{in\_review} \\
+Type, produit & whitepaper, \texttt{ices} & Classification & \texttt{public} \\
+Version & 4.0 & Date d'effet & 2026-11-02 (prévue) \\
+Propriétaire & Architecture \& Stratégie & Auteur & Serge TABE DJATO \\
+Relecteurs & CTO, conseil juridique (à confirmer) & Approbateur & CEO \\
+Remplace & Livre blanc ICES v3.0 (juillet 2026) & \texttt{logo\_intrepidlab} & oui \\
+Licence & CC BY 4.0 & Sources & voir les références \\
+\bottomrule
+\end{tabularx}}
+\vspace{6pt}
+
+\begin{icesbox}[Résumé exécutif]{intrepid}
+Une note de calcul d'ingénierie hydraulique fixe un diamètre, une pression, un volume de stockage, mais rien n'atteste son auteur, sa date ni son intégrité entre l'étude et la réception de l'ouvrage. ICES (IntrepidCore Engineering Standard) est un standard ouvert qui scelle ces notes par canonicalisation JSON, condensat SHA3-256 et signature Ed25519, vérifiables hors ligne par un tiers sans secret partagé. Le sceau rend une décision d'ingénierie attribuable, datée et non répudiable. Il ne prouve ni la justesse du calcul ni la conformité physique de l'ouvrage. La version 0.1 implémente l'intégrité, la signature et une liste locale de clés de confiance, avec un vérificateur de référence et des vecteurs de test publics. L'attribution à grande échelle et la chaîne de garde relèvent des phases suivantes de la feuille de route.
+\end{icesbox}
+
+{\small\textbf{Affiliation.} Ce livre blanc est un document de recherche d'IntrepidLab, structure de recherche et développement d'IntrepidCore, publié avec IntrepidCore.\\
+\textbf{Licence.} Ce document est publié sous licence Creative Commons Attribution 4.0 International. \textcopyright{} 2026 Serge TABE DJATO. Les logos et les noms IntrepidCore, IntrepidLab et ICES ne sont pas concédés par cette licence.}
+\newpage
+
+%% ── TABLES ───────────────────────────────────────────────────
+\tableofcontents
+\newpage
+\listoffigures
+\newpage
+\listoftables
+\newpage
+\pagenumbering{arabic}
+\pagestyle{corps}
+
+%% ════════════════════════════════════════════════════════════
+\IEpart{Le problème et les réponses existantes}{C05}
+
+\section{Une décision d'ingénierie sans auteur attribuable}\label{sec:intro}
+
+\subsection{Trois transitions où la traçabilité se rompt}
+
+Un réseau d'adduction d'eau potable est dimensionné par une note de calcul hydraulique, qui fixe les diamètres de canalisation, les pressions de service et les volumes de stockage. Un maître d'ouvrage public, un bailleur de fonds et une compagnie d'assurance décennale s'appuient sur ce document pour engager des fonds, valider un chantier ou couvrir un risque sur dix ans. Ce document ne porte aujourd'hui aucune garantie d'origine : rien n'établit, avec certitude, qui l'a produit, à quel instant, ni si le fichier remis à la réception est identique à celui validé à l'étude.
+
+Le cycle de vie d'un marché de travaux compte trois transitions où cette garantie disparaît (figure~\ref{fig:airgap}).
+
+\begin{enumerate}
+  \item \textbf{De l'étude à l'exécution.} L'entreprise adjudicataire produit ses propres études d'exécution (EXE). Modifier le coefficient de rugosité ou les hypothèses de débit permet de justifier un diamètre inférieur, moins coûteux. Faute de moyen de vérification rapide, le maître d'œuvre appose son visa \enquote{bon pour exécution} sur un dossier qui s'écarte sans bruit de l'enveloppe de l'avant-projet détaillé (APD).
+  \item \textbf{De l'exécution au chantier.} Même fidèle à l'APD, la pose peut s'en écarter : substitution de classe de pression, contrefaçon de raccords et de vannes, profondeur d'enfouissement modifiée sans déclaration. Les bordereaux de livraison peuvent être falsifiés, les tranchées sont remblayées et la preuve matérielle disparaît.
+  \item \textbf{Du chantier à la réception.} Le dossier de récolement doit décrire l'ouvrage réellement exécuté. Il peut se limiter à recopier les plans initiaux, sans les écarts survenus en chantier ; une fois la réception prononcée, l'écart entre l'ouvrage documenté et l'ouvrage enterré devient très difficile à corriger.
+\end{enumerate}
+
+Ce livre blanc nomme cette discontinuité l'\textbf{Air Gap APD-EXE}. Un motif voisin figure dans les audits de la commande publique : l'audit 2023 du ministère sénégalais de l'Eau et de l'Assainissement relève des réceptions prononcées sans réserve malgré des travaux non conformes et des insuffisances documentaires sur certains réseaux d'alimentation en eau potable~\cite{arcop_senegal_2024}. Ce constat porte sur un pays et un exercice ; il illustre le motif sans le quantifier.
+
+\begin{icesbox}[Scénario illustratif, à valeur pédagogique]{rouge}
+Un réseau d'adduction dessert un quartier. L'APD prescrit une conduite en polyéthylène haute densité (PEHD) de classe PN16 (pression nominale de 16 bar) et de 110~mm de diamètre sur le tronçon principal. L'entreprise adjudicataire pose du PN10, moins coûteux. Le dossier de récolement recopie les plans d'origine sans mentionner cette substitution, et la réception est prononcée. À la quatrième année d'exploitation, la conduite éclate sous une surpression que le PN10 ne supporte pas. Sans document attribuable, l'expertise post-sinistre doit reconstituer, de façon contradictoire, qui de l'étude, de l'exécution ou de la pose porte la responsabilité. ICES rend cette reconstitution immédiate sans empêcher la substitution elle-même ; la section~\ref{sec:oracle} situe la limite de cette garantie.
+\end{icesbox}
+
+\fig{fig_airgap}{0.86}{fig:airgap}{Sans sceau, la traçabilité d'un dossier se rompt à chaque transition d'un marché de travaux ; avec un sceau, elle se maintient sur le dossier numérique (échelle qualitative, non mesurée).}{Courbe de la traçabilité d'un dossier selon quatre phases : étude, exécution, chantier, réception. Sans sceau elle descend de établie à rompue ; avec sceau elle reste établie.}
+
+\subsection{Un déficit d'auditabilité des calculs}
+
+Une note de calcul produite sous tableur généraliste ne laisse aucune trace auditable des hypothèses ni des formules : aucun tiers ne peut la contrôler sans refaire le calcul. ICES traite ce déficit d'auditabilité. La question des licences logicielles n'entre pas dans son objet : un calcul se scelle quel que soit l'outil qui l'a produit, et un calcul produit sous licence peut dissimuler une altération en aval.
+
+\subsection{Portée du document}
+
+Ce document spécifie un mécanisme de preuve cryptographique, sa gouvernance et sa mise en œuvre (annexe~\ref{sec:annexe}). Il n'élimine pas la fraude d'ingénierie, ne dispense pas d'inspection physique et ne remplace pas le contrôle technique réglementaire ; la section~\ref{sec:limites} liste ces limites. Les sections~\ref{sec:intro}, \ref{sec:reponses}, \ref{sec:juridique}, \ref{sec:gouvernance} et~\ref{sec:limites} se lisent sans connaissance en cryptographie. Les sections~\ref{sec:garanties} à~\ref{sec:oracle} et l'annexe~\ref{sec:annexe} s'adressent aux cryptographes et aux auditeurs de sécurité.
+
+Le document distingue ce que la version 0.1 implémente de ce que la feuille de route prévoit. Chaque mécanisme porte un niveau d'affirmation du guide de rédaction d'IntrepidCore (exploratoire, soutenu, vérifié) ; le tableau~\ref{tab:maturite} (section~\ref{sec:feuille-de-route}) en donne la synthèse.
+
+%% ═════════════════════════════════════════════════════════════
+\section{Trois réponses existantes et leurs limites}\label{sec:reponses}
+
+Trois familles de réponses existent aujourd'hui. Aucune ne referme seule l'Air Gap. Le tableau~\ref{tab:approches} les compare à ICES.
+
+\textbf{L'audit a posteriori} (missions du bureau de contrôle technique (BCT), audits des autorités de régulation, procédures judiciaires) intervient après le remblaiement de la tranchée, quand la preuve matérielle a disparu. Engager une procédure contre de nombreuses petites structures dispersées sur un territoire mobilise des moyens que peu d'administrations peuvent y consacrer.
+
+\textbf{La signature à clé embarquée} donne l'apparence d'une preuve. Lorsque la clé publique de vérification est embarquée dans le document lui-même, la vérification établit seulement la possession d'une clé au moment de la signature, jamais l'identité ni la légitimité du signataire : n'importe qui peut générer sa propre paire de clés, resigner un document modifié et obtenir une vérification positive. La gestion de clés exige d'établir l'association entre une clé publique et son titulaire par un moyen extérieur au document signé~\cite{nist80057}. ICES sépare pour cette raison la vérification de signature (section~\ref{sec:anatomie}) de la vérification de confiance (section~\ref{sec:confiance}).
+
+\textbf{La boîte noire propriétaire} déplace le problème : elle demande de faire confiance à l'éditeur du logiciel plutôt qu'à l'auteur du calcul. Aucun tiers ne peut auditer ce qui se passe à l'intérieur, et le dispositif dépend d'un fournisseur unique, ce qui est difficile à justifier pour un État qui engage des fonds publics ou empruntés sur plusieurs décennies. Un changement de conditions commerciales ou une interruption de service peut rendre le dispositif de preuve inaccessible au moment d'un litige.
+
+\begin{table}[H]\centering\small
+\caption{Trois approches comparées sur la détection, le coût, l'usage hors ligne et la gouvernance.}\label{tab:approches}
+\begin{tabularx}{\linewidth}{@{}p{3.1cm}XXX@{}}
+\toprule
+& \textbf{Audit a posteriori} & \textbf{Boîte noire propriétaire} & \textbf{ICES} \\
+\midrule
+Détection de l'altération & Après coup, si un contrôle a lieu & Non auditable par un tiers & Immédiate, par quiconque détient le fichier et une clé de confiance \\
+Coût de vérification & Élevé : expertise, contentieux & Nul pour l'éditeur, opaque pour le client & Faible : calcul local en quelques secondes \\
+Usage hors ligne & Non & Non & Oui, avec un état de révocation éventuellement périmé (section~\ref{sec:cles}) \\
+Gouvernance & Neutre & Propriétaire, fournisseur unique & Cédée par phases (section~\ref{sec:gouvernance}) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+%% ════════════════════════════════════════════════════════════
+\IEpart{Le sceau}{B01}
+
+\section{Trois garanties et leurs limites}\label{sec:garanties}
+
+Un discours sur la preuve cryptographique risque de prêter à des garanties faibles la crédibilité d'une garantie forte. ICES distingue donc trois niveaux de garantie, de nature différente, et n'en laisse aucun se substituer aux deux autres (tableau~\ref{tab:garanties}, figure~\ref{fig:guarantees}).
+
+\begin{table}[H]\centering\small
+\caption{Les trois garanties d'ICES, ce qu'elles établissent et leur force.}\label{tab:garanties}
+\begin{tabularx}{\linewidth}{@{}p{3.1cm}Xp{3.9cm}@{}}
+\toprule
+\textbf{Garantie} & \textbf{Ce qu'elle établit} & \textbf{Force} \\
+\midrule
+Intégrité du calcul & Le résultat scellé provient de ces entrées, via ce moteur, sans altération depuis la signature. & Forte, sous deux hypothèses : résistance de SHA3-256 aux collisions et inforgeabilité d'Ed25519 (section~\ref{sec:primitives}). \\
+Attribution & Un acteur identifié, titulaire d'une clé enrôlée par une autorité reconnue, a produit cette signature à un instant donné. & Conditionnelle à la gouvernance du registre de confiance (section~\ref{sec:confiance}). \\
+Véracité physique & Le contenu scellé correspond à l'état réel de l'ouvrage. & \textbf{Nulle par construction} : aucun mécanisme cryptographique n'établit ce lien (section~\ref{sec:oracle}). \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\fig{fig_guarantees}{0.86}{fig:guarantees}{L'intégrité est forte sous hypothèses cryptographiques, l'attribution dépend de la gouvernance du registre et la véracité physique est nulle au niveau cryptographique.}{Trois barres horizontales sur une échelle de nulle à forte : intégrité du calcul forte, attribution conditionnelle, véracité physique nulle.}
+
+ICES change le coût de la fraude plus qu'il n'en change la faisabilité. Une fraude dissimulable et déniable sans sceau devient une altération détectable et une décision signée, attribuable à une personne nommée et opposable devant un juge ou un assureur (figure~\ref{fig:fraudcost}).
+
+\fig{fig_fraudcost}{0.86}{fig:fraudcost}{Avec un sceau, l'attribution personnelle et la détectabilité d'une altération passent d'un niveau faible à un niveau élevé, et la preuve devient exploitable en justice sous réserve de la qualification juridique (échelle qualitative, non mesurée).}{Trois paires de barres comparant sans et avec ICES : attribution personnelle, détectabilité d'une altération, preuve exploitable en justice. Les barres avec ICES sont plus longues.}
+
+%% ═════════════════════════════════════════════════════════════
+\section{Anatomie technique du sceau}\label{sec:anatomie}
+
+\subsection{Modèle de menace et primitives}\label{sec:primitives}
+
+ICES protège contre un adversaire capable de lire et de modifier un document scellé, mais incapable de casser les primitives cryptographiques sous-jacentes ou de compromettre la clé privée du signataire légitime. Deux propriétés doivent alors tenir : il doit être infaisable de produire un document différent portant le même condensat (résistance aux collisions), et infaisable de produire une signature valide sans la clé privée correspondante (inforgeabilité existentielle).
+
+La première propriété repose sur \textbf{SHA3-256}, standardisé par le National Institute of Standards and Technology (NIST)~\cite{fips202}. SHA3 utilise une construction en éponge, structurellement différente de la famille SHA-2, qui n'est pas exposée aux attaques par extension de longueur. La seconde repose sur \textbf{Ed25519}~\cite{rfc8032}, signature définie par la Request for Comments (RFC) 8032, dont l'inforgeabilité existentielle sous attaque à message choisi est établie sous hypothèse de difficulté du logarithme discret sur courbe elliptique~\cite{bernstein2012eddsa}. Ed25519 est déterministe : la même clé privée appliquée au même condensat produit toujours la même signature, sans générateur d'aléa au moment de signer, ce qui écarte une classe de failles d'implémentation.
+
+Ces deux primitives sont des standards publics indépendants d'IntrepidCore. Leur solidité ne repose pas sur la confiance accordée à l'éditeur du logiciel qui les implémente.
+
+\subsection{Canonicalisation déterministe}\label{sec:canon}
+
+Un même contenu logique peut s'écrire de plusieurs façons en JSON : ordre des clés, espacement et représentation des nombres diffèrent. Avant tout hachage, ICES applique deux opérations. La première arrondit chaque nombre à une précision fixée par champ (tableau~\ref{tab:precision}). La seconde sérialise le résultat selon le JSON Canonicalization Scheme (JCS, RFC~8785)~\cite{rfc8785} : les clés d'un objet sont triées selon leurs unités de code UTF-16, et chaque nombre a une représentation unique.
+
+L'arrondi remplace la valeur flottante native du moteur par un nombre à décimales fixées. Sans table commune, deux implémentations arrondiraient différemment et produiraient deux sceaux pour un même calcul ; la table fait donc partie de la spécification. L'arrondi absorbe aussi, avant le hachage, les variations de dernier bit qu'une architecture ou un compilateur différent introduirait dans un calcul flottant (section~\ref{sec:determinisme}). La figure~\ref{fig:avantapres} montre l'effet des deux opérations.
+
+\begin{figure}[H]\centering
+\begin{minipage}[t]{0.47\linewidth}
+\textbf{\small Avant : saisie brute}
+\begin{code}
+{
+  "diametre_mm": 110.0,
+  "scenario": "outage_p95",
+  "pression_bar": 6.2000004
+}
+\end{code}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.47\linewidth}
+\textbf{\small Après : arrondi par champ et JCS}
+\begin{code}
+{"diametre_mm":110,"pression_bar":6.2,
+"scenario":"outage_p95"}
+\end{code}
+\end{minipage}
+\caption{L'arrondi par champ (0 décimale pour le diamètre, 3 pour la pression) puis la sérialisation JCS donnent une forme unique : clés triées, séparateurs compacts, nombres sans zéros superflus.}\label{fig:avantapres}
+\end{figure}
+
+\subsection{Calcul du condensat}
+
+Les blocs du MissionBundle (\texttt{inputs}, \texttt{scenario}, \texttt{outputs}, \texttt{gates}) sont canonicalisés séparément, puis concaténés avec l'identifiant de moteur \texttt{engine\_version} dans l'ordre fixe de la figure~\ref{fig:digest}. L'identifiant de moteur est une chaîne et non un objet JSON : il entre tel quel, en UTF-8. Un bundle sans \texttt{scenario} omet ce terme (état \enquote{legacy} déterministe). Le condensat SHA3-256 de cette séquence est ensuite signé en Ed25519.
+
+\begin{figure}[H]\centering
+\begin{tikzpicture}[node distance=0.45cm]
+  \node[draw=intrepid, thick, rounded corners, fill=intrepid!6, minimum width=10.4cm, minimum height=0.9cm, align=center] (inputs) {\texttt{inputs} $\Vert$ \texttt{scenario} $\Vert$ \texttt{engine\_version} $\Vert$ \texttt{outputs} $\Vert$ \texttt{gates}};
+  \node[draw=accent, thick, rounded corners, fill=accent!8, minimum width=10.4cm, minimum height=0.9cm, align=center, below=of inputs] (canon) {Arrondi par champ, puis JCS (RFC~8785)};
+  \node[draw=vertAtlas, thick, rounded corners, fill=vertAtlas!8, minimum width=10.4cm, minimum height=0.9cm, align=center, below=of canon] (sha3) {Condensat SHA3-256};
+  \node[draw=rouge, thick, rounded corners, fill=rouge!8, minimum width=10.4cm, minimum height=0.9cm, align=center, below=of sha3] (ed) {Signature Ed25519 du condensat, enveloppe \texttt{ices\_envelope}};
+  \draw[-{Latex[length=2.5mm]}, thick] (inputs) -- (canon);
+  \draw[-{Latex[length=2.5mm]}, thick] (canon) -- (sha3);
+  \draw[-{Latex[length=2.5mm]}, thick] (sha3) -- (ed);
+\end{tikzpicture}
+\caption{Le sceau se calcule en quatre opérations : concaténation dans un ordre fixe, canonicalisation, condensat SHA3-256, signature Ed25519.}\label{fig:digest}
+\end{figure}
+
+Un condensat unique ne désigne pas le bloc qui a divergé en cas de litige. Un condensat par bloc le permettrait ; cette extension n'est pas dans la version 0.1 (niveau exploratoire).
+
+\subsection{Étapes de la vérification}\label{sec:verif}
+
+La vérification d'un sceau ne requiert ni réseau ni accès à IntrepidCore. Le vérificateur, exécuté localement :
+
+\begin{enumerate}
+  \item applique au MissionBundle l'arrondi par champ et la canonicalisation JCS utilisés à la signature ;
+  \item recalcule le condensat SHA3-256 sur cette représentation ;
+  \item extrait la signature Ed25519 et la clé publique du sceau, exprimée en base64 ou sous la forme d'un identifiant \texttt{did:key}~\cite{w3c_did_key} ;
+  \item vérifie la signature contre le condensat annoncé et exige que celui-ci égale le condensat recalculé ;
+  \item contrôle que la clé figure dans la liste de clés de confiance, qu'elle était valide et non révoquée à la date de signature (section~\ref{sec:confiance}) ;
+  \item contrôle que la clé était \emph{autorisée} pour la phase du document, d'après le Manifeste de Projet (section~\ref{sec:garde}) ;
+  \item rend un verdict avec le motif précis du rejet le cas échéant : condensat divergent, signature invalide, clé non enrôlée, clé révoquée à la date de signature, clé non autorisée pour cette phase.
+\end{enumerate}
+
+Le vérificateur de référence de la version 0.1 implémente les étapes 1 à 5 et 7 : l'étape 5 s'appuie sur une liste de clés de confiance fournie à l'exécution, avec date de validité et date de révocation, et le vérificateur refuse par défaut un sceau si aucune liste n'est fournie. Le journal de transparence de la section~\ref{sec:confiance} arrive en Phase~2. L'étape 6 relève de la Phase~3.
+
+Un \texttt{did:key} est un identifiant de clé publique auto-descriptif : il contient, encodés en multibase, les octets bruts de la clé Ed25519, sans autorité de certification centrale ni résolution réseau~\cite{w3c_did_key}. Cette propriété rend l'étape 3 exécutable hors ligne.
+
+Le verdict établit que le document n'a pas changé depuis sa signature et quelle clé l'a signé ; lorsque les étapes 5 et 6 sont actives, il établit aussi que cette clé avait l'autorité de le produire. Il ne dit rien de la correspondance entre le document et l'ouvrage physique (section~\ref{sec:oracle}).
+
+%% ═════════════════════════════════════════════════════════════
+\section{Déterminisme et durée de vie du dossier scellé}\label{sec:determinisme}
+
+\subsection{Ce que le sceau couvre}
+
+Une infrastructure hydraulique a une durée de vie de plusieurs décennies. Si la validité du sceau supposait qu'un ordinateur de 2066 rejoue un calcul flottant identique au bit près à celui de 2026, la garantie serait fragile : un changement de compilateur, de système d'exploitation ou d'architecture peut modifier le dernier bit d'un nombre flottant, ce qui suffit à produire un condensat entièrement différent.
+
+\textbf{Le sceau porte sur le MissionBundle stocké, non sur la capacité à recalculer.} Vérifier un sceau consiste à recalculer un condensat sur des octets figés et à contrôler une signature. Cette opération ne relance jamais le solveur hydraulique et ne dépend pas des flottants. L'arrondi à précision fixée (section~\ref{sec:canon}) supprime déjà, avant le premier hachage, les écarts de dernier bit.
+
+\subsection{Reproductibilité, une garantie distincte}
+
+Un besoin distinct subsiste : rejouer un calcul pour vérifier que le moteur n'a pas faussé ses résultats. Cette reproductibilité est séparée de l'intégrité du dossier et n'est pas implémentée dans la version 0.1 (niveau exploratoire). Elle s'appuierait sur une compilation en WebAssembly, exécutée par un hôte qui neutralise les sources de non-déterminisme : horloge système, aléa non initialisé, ordre d'itération non spécifié~\cite{wasi}. La chaîne d'outils exacte (image de compilation, version du moteur) serait archivée avec le dossier scellé. La reproductibilité serait garantie au sein d'une version majeure du moteur, tant qu'IntrepidCore maintient la chaîne archivée ; elle n'est pas revendiquée comme éternelle. L'archive suivrait une doctrine de préservation numérique standard (migration périodique des formats, duplication géographique), distincte de la validité du sceau.
+
+\subsection{Agilité cryptographique et menace à long terme}\label{sec:pq}
+
+Une infrastructure scellée aujourd'hui peut rester en service au-delà de 2060. Ed25519 repose sur la difficulté du logarithme discret sur courbe elliptique, qu'un ordinateur quantique suffisamment puissant résoudrait par l'algorithme de Shor. SHA3-256 n'est qu'affaibli par l'algorithme de Grover, avec une résistance aux collisions de l'ordre de 128 bits, niveau considéré sûr. La menace porte donc sur la \textbf{signature}, non sur le hachage, et son horizon se situe, d'après les estimations publiques~\cite{nistpqc}, au plus tôt entre 2035 et 2045 (figure~\ref{fig:ltv}).
+
+\fig{fig_ltv}{0.9}{fig:ltv}{Le format du sceau porte un identifiant d'algorithme et prévoit des re-ancrages périodiques par contre-signature avant l'entrée dans la fenêtre de menace quantique estimée.}{Frise de 2026 à 2066 : Ed25519 jusqu'en 2038, algorithme post-quantique ensuite, fenêtre de menace quantique estimée de 2035 à 2045, trois re-ancrages périodiques.}
+
+ICES prévoit deux dispositions. Le format du sceau porte un \textbf{identifiant d'algorithme explicite} : un nouveau profil s'ajoute au standard sans invalider les sceaux existants, dont le champ d'algorithme reste daté. Un mécanisme de \textbf{re-ancrage périodique}, sur le modèle des enregistrements de preuve normalisés (\emph{Evidence Records}, RFC~4998)~\cite{rfc4998}, contre-signe un lot de sceaux sous un nouvel algorithme avant que l'ancien devienne cassable. Ce livre blanc ne fixe pas d'échéance de migration, faute de visibilité sur le calendrier réel de la menace ; il engage le principe d'agilité qui rend cette migration possible sans réécrire le standard.
+
+\subsection{Couverture du modèle de menace}
+
+La figure~\ref{fig:threat} synthétise ce que la couche technique couvre. La détection et la réponse sont fortes pour l'altération numérique et le vol de clé. Elles restent partielles ou faibles pour la substitution physique et la menace quantique, dont le traitement dépend d'acteurs et de délais extérieurs à la cryptographie.
+
+\fig{fig_threat}{0.9}{fig:threat}{La couverture est forte pour l'altération numérique, partielle pour le vol de clé et le témoin corrompu, faible pour la substitution physique et la menace quantique.}{Matrice de six menaces sur deux colonnes, détection et réponse, avec les niveaux faible, partielle ou forte écrits dans chaque case.}
+
+%% ════════════════════════════════════════════════════════════
+\IEpart{La confiance et la preuve de terrain}{A02}
+
+\section{Le maillon de confiance}\label{sec:confiance}
+
+\subsection{Deux questions distinctes}
+
+Le défaut décrit à la section~\ref{sec:reponses} sépare deux questions : \enquote{ce document a-t-il été signé avec telle clé ?} et \enquote{cette clé appartient-elle à un professionnel digne de confiance ?}. Seule la seconde a valeur probante pour l'attribution. Un acteur qui modifie le contenu peut générer sa propre paire de clés, signer le document modifié et embarquer sa clé publique : la signature est alors mathématiquement correcte alors que le contenu est altéré.
+
+\subsection{Gouvernance du registre de confiance}
+
+La vérification n'accepte qu'une clé référencée dans un \textbf{registre de confiance}, jamais la seule clé embarquée dans le document. Sans entrée correspondante, le sceau est rejeté par défaut (\emph{fail-closed}), même si la signature est correcte. La question restante est institutionnelle : qui tient ce registre.
+
+Le registre s'appuie sur une ancre de confiance qui existe déjà dans la commande publique : l'autorité d'accréditation professionnelle, ou l'autorité de certification électronique nationale, qui enrôle les ingénieurs et les bureaux d'études habilités à soumissionner. Le signataire d'un sceau ICES est un professionnel accrédité, et sa clé publique est enrôlée par la même autorité. ICES ne crée pas de hiérarchie de confiance supplémentaire.
+
+Avant qu'une autorité publique reprenne cette fonction, IntrepidCore peut opérer le registre à titre transitoire. Ce régime est une centralisation nommée comme telle (figure~\ref{fig:trust}). Il se distingue d'une boîte noire par sa structure : le registre est un \textbf{journal de transparence à ajout seul}, sur le modèle de Certificate Transparency~\cite{rfc6962}. Chaque ajout ou révocation de clé produit une nouvelle tête d'arbre de Merkle, signée par l'opérateur du journal et publiée. Un \textbf{moniteur tiers}, rôle que toute organisation peut endosser sans autorisation préalable, synchronise ces têtes signées, reconstruit l'arbre et vérifie l'absence de réécriture rétroactive. Un opérateur malveillant peut tenter d'ajouter une clé indue, mais pas sans qu'un moniteur le détecte. ICES se situe donc, à l'amorçage, sur un modèle \textbf{fédéré et audité}, non décentralisé. L'intégrité reste indépendante de l'opérateur du registre ; l'attribution en dépend jusqu'au transfert de gouvernance. Le format d'échange du moniteur (liste d'entrées horodatées, tête signée, preuve d'inclusion) est un format cible décrit à l'annexe~\ref{sec:spec-ext}.
+
+\fig{fig_trust}{0.9}{fig:trust}{ICES se situe, à l'amorçage, sur un modèle fédéré et audité ; la cible est une gouvernance publique cédée, jamais un registre sans autorité.}{Flèche horizontale du centralisé au décentralisé avec quatre repères : boîte noire propriétaire, ICES à l'amorçage, ICES à la cible, registre public sans autorité.}
+
+\begin{icesbox}[Repli si aucune autorité publique ne se porte candidate]{accent}
+La transition vers une autorité de certification électronique nationale ou un régulateur sectoriel suppose une volonté institutionnelle qui n'est pas acquise dans tous les États de la zone. Si aucune autorité publique ne reprend le registre au terme de la Phase~3, l'organe de gouvernance du standard (section~\ref{sec:gouvernance}), consortium indépendant fondé en Phase~0, devient le détenteur de repli. La pérennité de l'attribution ne dépend alors pas d'une décision politique dans un pays donné.
+\end{icesbox}
+
+\subsection{Clés courtes, horodatage et révocation}\label{sec:cles}
+
+La vérification hors ligne pose une question que la signature seule ne résout pas : comment l'outil d'un inspecteur sans réseau sait-il qu'une clé a été compromise après la dernière synchronisation de son registre local ? Sans mécanisme de révocation, un attaquant en possession d'une clé volée produirait des sceaux valides indéfiniment. ICES combine quatre mécanismes (figure~\ref{fig:keywindow}) qui préservent la vérification hors ligne et bornent la fenêtre d'exploitation d'une clé compromise.
+
+\begin{enumerate}
+  \item \textbf{Clés opérationnelles à durée de vie courte}, avec une rotation de l'ordre de la semaine ou du mois, chacune attestée par la clé racine (section~\ref{sec:racine}). Une clé volée n'est exploitable que dans sa fenêtre de validité.
+  \item \textbf{Horodatage de confiance en deux paliers}, décrits plus bas.
+  \item \textbf{Attestation agrafée} (\emph{stapling}) : le sceau embarque la preuve que la clé était valide à l'instant de la signature. Un sceau produit avant une compromission reste valide après la révocation ; un faux produit après la révocation échoue, car aucune attestation postérieure ne peut être agrafée.
+  \item \textbf{Propagation asynchrone de la révocation} : l'état de révocation, petit artefact de quelques identifiants de clé et horodatages (annexe~\ref{sec:spec-ext}), se synchronise indépendamment de chaque vérification, par tout canal disponible : clé USB entre le siège du BCT et un chantier isolé, message signé transmis par SMS ou messagerie basse bande, synchronisation réseau dès qu'elle redevient possible. Un vérificateur dont l'état de révocation dépasse un seuil de fraîcheur maximal bascule en \emph{fail-closed} : il refuse le sceau plutôt que de l'accepter sur une information potentiellement obsolète.
+\end{enumerate}
+
+\fig{fig_keywindow}{0.9}{fig:keywindow}{Sans révocation, un vol expose des faux valides indéfiniment ; une clé courte avec révocation asynchrone borne la fenêtre à quelques unités de rotation (schéma illustratif).}{Deux frises temporelles : une clé à longue durée dont la fenêtre d'exploitation après le vol est illimitée, et une clé courte révoquée peu après le vol.}
+
+Le protocole d'horodatage RFC~3161~\cite{rfc3161} exige une interrogation en ligne d'une autorité d'horodatage : un BCT sans connectivité sur un chantier isolé ne peut pas l'invoquer au moment de l'essai. ICES retient donc un \textbf{horodatage en deux paliers}. Le \textbf{palier~1}, disponible partout, signe localement le condensat avec l'horloge du dispositif de signature ; la date qui en résulte a la force probante de l'horloge matérielle, suffisante pour la majorité des usages. Le \textbf{palier~2}, renforcement optionnel, ancre le même condensat auprès d'une autorité RFC~3161 et du journal de transparence dès que le signataire retrouve une connectivité, ce qui donne une preuve de date indépendante de l'horloge locale. Un sceau de palier~1 reste pleinement valide ; le palier~2 renforce sa force probante sans conditionner son existence. La version 0.1 implémente uniquement le palier~1 : la date de signature est celle que déclare l'émetteur.
+
+\subsection{Manifeste de Projet et chaîne de garde}\label{sec:garde}
+
+Le registre de confiance établit qu'une clé appartient à un professionnel accrédité. Il n'établit pas que ce professionnel avait le droit d'intervenir sur \emph{ce projet, à cette phase}. Un bureau d'études et une entreprise de travaux publics détiennent des clés distinctes ; sans mécanisme additionnel, n'importe quel professionnel accrédité pourrait produire un sceau As-Built (dossier de l'ouvrage tel que construit) valide sur un projet dont il n'a jamais eu la charge.
+
+ICES ferme cette faille par un \textbf{Manifeste de Projet}, objet cryptographique distinct émis par l'autorité contractante à l'attribution du marché. Le manifeste lie l'identifiant public du marché aux clés publiques autorisées pour chaque phase : la clé du bureau d'études pour l'APD, celle de l'entreprise adjudicataire pour l'EXE et l'As-Built, celle du BCT pour la co-signature de récolement (section~\ref{sec:oracle}). L'étape 6 de la vérification contrôle ce manifeste : un sceau signé par une clé enrôlée mais non autorisée pour ce projet et cette phase est rejeté, même si la signature est correcte. Les champs du manifeste sont décrits à l'annexe~\ref{sec:spec-ext} ; ce mécanisme relève de la Phase~3.
+
+\subsection{Profils de sécurité des signataires}\label{sec:profils}
+
+La garantie d'attribution vaut ce que vaut la protection de la clé privée. Une clé stockée sans chiffrement sur un poste partagé par plusieurs employés annule l'attribution sans que le sceau le révèle : la signature reste valide, mais elle n'identifie plus une personne. ICES publie donc, avec la spécification, des \textbf{profils de sécurité minimaux recommandés} par catégorie de signataire : un jeton matériel ou une carte à puce pour les bureaux d'études et les entreprises, un dispositif renforcé pour les BCT compte tenu du poids de leur co-signature. La cryptographie accepte toute clé Ed25519 valide ; ces profils sont une recommandation opérationnelle, et leur non-respect est un risque assumé par le signataire.
+
+La répudiation relève de la même section. Un signataire qui prétend qu'une signature ne provient pas de lui doit pouvoir le démontrer. La rotation courte (section~\ref{sec:cles}), la révocation d'urgence et l'obligation de signaler immédiatement le vol d'un dispositif limitent ce risque : le canal de révocation d'urgence invalide les sceaux futurs sans annuler les sceaux antérieurs au vol (section~\ref{sec:incident}).
+
+\subsection{Architecture de la clé racine}\label{sec:racine}
+
+La clé racine ne signe jamais un MissionBundle. Elle n'intervient que pour attester ou faire tourner les clés opérationnelles (figure~\ref{fig:rootkey}). Sa cérémonie repose sur un \textbf{partage de secret de Shamir}~\cite{shamir1979} à seuil 3 sur 5 : la clé racine n'existe sous forme reconstituée qu'à l'instant de la cérémonie, sur une machine jamais connectée à internet, et sa reconstitution exige la collusion d'au moins trois des cinq porteurs de parts. Chaque cérémonie, rotation ou attestation est consignée dans un procès-verbal signé par les porteurs présents.
+
+\begin{figure}[H]\centering
+\begin{tikzpicture}[node distance=1.2cm]
+  \node[draw=rouge, thick, rounded corners, fill=rouge!6, minimum width=5.6cm, minimum height=1.3cm, align=center] (root) {Clé racine, seuil 3 sur 5\\hors ligne, partage de Shamir};
+  \node[draw=vertAtlas, thick, rounded corners, fill=vertAtlas!8, minimum width=5.6cm, minimum height=1.3cm, align=center, below=of root] (kms) {Clés opérationnelles\\service de gestion de clés (KMS),\\rotation périodique};
+  \draw[-{Latex[length=2.5mm]}, thick] (root) -- node[right] {\small atteste, rarement} (kms);
+  \node[right=1.0cm of kms, draw=intrepid, thick, rounded corners, fill=intrepid!8, minimum width=4.4cm, minimum height=1.3cm, align=center] (bundles) {Signent les\\MissionBundles};
+  \draw[-{Latex[length=2.5mm]}, thick] (kms) -- (bundles);
+\end{tikzpicture}
+\caption{La clé racine, hors ligne et partagée entre cinq porteurs, n'atteste que les clés opérationnelles ; ce sont ces dernières qui signent les MissionBundles au quotidien.}\label{fig:rootkey}
+\end{figure}
+
+Le vol d'une clé opérationnelle expose une fenêtre bornée et révocable. Le vol de la clé racine exigerait de compromettre trois porteurs indépendants et de reproduire la logistique d'une cérémonie physique. Un module matériel de sécurité (HSM) dédié renforcerait la garantie sur la clé racine ; ce choix est écarté avant la phase de gouvernance élargie, car le coût d'un HSM certifié dépasse ce que justifie le volume actuel de scellements, et la cérémonie à seuil combinée à un KMS géré couvre le scénario de menace réaliste à ce stade. L'arbitrage sera révisé quand le volume de MissionBundles scellés le justifiera.
+
+\subsection{Réponse à incident et continuité}\label{sec:incident}
+
+Trois défaillances sont anticipées. \textbf{Compromission d'une clé opérationnelle} : révocation immédiate publiée au journal de transparence et propagée de façon asynchrone (section~\ref{sec:cles}) ; les sceaux signés avant la compromission restent valides grâce à l'attestation agrafée. \textbf{Compromission de la clé racine} : seul scénario qui justifie une nouvelle cérémonie complète ; toutes les clés opérationnelles attestées par l'ancienne racine sont révoquées puis ré-attestées sous la nouvelle, événement rare et coûteux par conception. \textbf{Faille dans l'implémentation de référence} : divulgation coordonnée, correctif publié après un préavis, et vérification de sa conformité aux vecteurs de test (section~\ref{sec:conformite}) avant diffusion. Dans les trois cas, l'intégrité des sceaux déjà émis n'est jamais remise en cause rétroactivement ; seule la capacité à produire de \emph{nouveaux} sceaux avec la clé ou l'implémentation affectée est suspendue.
+
+%% ═════════════════════════════════════════════════════════════
+\section{Le problème de l'oracle physique}\label{sec:oracle}
+
+\subsection{Ce que la cryptographie ne garantit pas}
+
+Le mécanisme des sections~\ref{sec:anatomie} et~\ref{sec:confiance} établit qu'un document n'a pas été modifié depuis sa signature par une clé identifiée. Il n'établit rien sur l'exactitude du contenu au moment de la signature. Si une entreprise pose une conduite PN10 dans une tranchée et saisit \enquote{PN16} dans le logiciel qui génère le sceau de récolement, le sceau est cryptographiquement valide : la signature est correcte, la clé est enrôlée, le condensat correspond au contenu saisi. Un inspecteur qui vérifie ce sceau hors ligne obtient un résultat positif, alors que la conduite enterrée ne correspond pas au document. La sécurité de l'information nomme cette limite le problème de l'oracle : aucune signature ne garantit la véracité d'une donnée qu'elle se contente de sceller.
+
+ICES ne prétend pas résoudre ce problème par des mathématiques supplémentaires. Il le traite par deux mécanismes non cryptographiques : un tiers indépendant dont la signature engage sa propre responsabilité, et l'ancrage de cette signature à des preuves matérielles difficiles à falsifier.
+
+\subsection{Témoin tiers et preuves matérielles attestées}
+
+Le sceau de récolement (ICES-As-Built) n'est jamais généré par la seule entreprise adjudicataire. Il requiert la co-signature du \textbf{BCT}, tiers indépendant déjà mandaté dans le dispositif d'assurance décennale de la zone de la Conférence interafricaine des marchés d'assurances (CIMA) pour prévenir les aléas techniques et produire les rapports périodiques qui conditionnent l'assurabilité de l'ouvrage. Le BCT ne se contente pas d'attester une déclaration : il signe qu'il a lui-même collecté une preuve numérique déterminée sur le terrain.
+
+Cette distinction est décisive. Le BCT n'atteste pas \enquote{je certifie que c'est conforme}, déclaration d'opinion difficile à contester ou à engager juridiquement. Il atteste \enquote{j'ai personnellement collecté cette preuve à cet instant et en cet endroit}, déclaration de fait vérifiable indépendamment de son jugement et qui engage sa responsabilité s'il a falsifié la collecte elle-même. Pour falsifier, un BCT sous pression locale devrait alors fabriquer une preuve matérielle et non seulement signer une opinion complaisante.
+
+Les preuves de terrain n'ont pas toutes la même valeur (figure~\ref{fig:evidence}). Une photographie géotaguée prise avec un téléphone générique est \textbf{déclarative} : la métadonnée EXIF (Exchangeable Image File Format) qui porte les coordonnées GPS et l'horodatage est écrite par le système d'exploitation et modifiable en quelques secondes par une application de simulation de position. La sceller avec la même rigueur qu'une preuve matérielle ne la rend pas plus fiable ; cela scelle parfaitement une donnée peut-être falsifiée à la source.
+
+\fig{fig_evidence}{0.8}{fig:evidence}{Le poids probant d'une preuve de terrain croît avec le niveau d'attestation matérielle, de la métadonnée déclarative à la preuve produite par un instrument dont l'horloge et la position échappent au signataire.}{Pyramide à trois niveaux : photo géotaguée déclarative, capture par dispositif attesté, preuve matérielle de l'instrument, avec une flèche de poids probant croissant.}
+
+ICES distingue trois niveaux. Une \textbf{photo géotaguée déclarative} reste admissible comme pièce corroborante, jamais comme pièce probante isolée. Une \textbf{capture par dispositif attesté}, c'est-à-dire une application de constat qui verrouille la puce GPS et l'horloge réseau du terminal et signe la capture sur le dispositif, élève la preuve à un niveau probant sous condition d'utiliser un dispositif certifié. Une \textbf{preuve matérielle produite par un instrument de mesure} constitue le niveau le plus probant : la courbe de montée en pression enregistrée par la machine d'épreuve, dont le journal est intrinsèque à l'appareil et non modifiable par l'opérateur, ou le numéro de lot rapproché électroniquement du bordereau de livraison du fournisseur. L'instrument, non l'opérateur, est la source de la donnée. La feuille de route (section~\ref{sec:feuille-de-route}) conditionne la montée en exigence contractuelle de ce niveau à la disponibilité d'applications de constat certifiées dans la sous-région.
+
+Ce mécanisme rend la collusion plus coûteuse et plus difficile à dissimuler, et transforme sa découverte en preuve exploitable devant un tribunal ou un assureur si le niveau de preuve correspond à l'enjeu. La section~\ref{sec:juridique} relie cette chaîne de preuve à la responsabilité décennale.
+
+%% ════════════════════════════════════════════════════════════
+\IEpart{La responsabilité et la gouvernance}{D06}
+
+\section{De la preuve à la responsabilité juridique}\label{sec:juridique}
+
+Cette section expose une analyse de principe. Les points juridiques marqués \aconfirmer{} n'ont pas été vérifiés auprès d'un conseil spécialisé ; ils figurent dans la feuille de route comme chantier ouvert.
+
+\subsection{Un cachet avancé, non qualifié}
+
+ICES vise le niveau d'un cachet électronique avancé et ne constitue pas aujourd'hui un cachet ou une signature qualifiés. Sa qualification au regard du droit de dématérialisation de l'Union économique et monétaire ouest-africaine (UEMOA) est \aconfirmer. Dans les régimes de signature électronique inspirés du règlement européen eIDAS, un cachet qualifié bénéficie d'une présomption de fiabilité tandis qu'un cachet avancé n'en bénéficie pas. Si le droit applicable en UEMOA suit cette structure, la partie qui s'appuie sur un sceau ICES, généralement l'administration, devrait établir en cas de contestation la fiabilité de la cryptographie sous-jacente, potentiellement au prix d'une bataille d'experts. L'accréditation d'un prestataire de services de confiance qualifié (PSCQ) est un jalon de la feuille de route, non un fait acquis. Un audit cryptographique indépendant de l'implémentation de référence, publié et daté, serait la pièce que l'administration produirait en première ligne.
+
+\subsection{Le contrat comme substitut}
+
+En l'absence de présomption légale, la force du sceau repose sur le droit du contrat. Le cahier des clauses techniques particulières (CCTP) peut faire de la conformité ICES une spécification technique substantielle. Le cahier des clauses administratives particulières (CCAP) peut conditionner les décomptes de paiement et la réception provisoire à la production d'un sceau As-Built cohérent avec l'enveloppe de l'APD, dans une tolérance définie par contrat. Le contrat peut qualifier toute altération avérée du protocole de pratique frauduleuse, ce qui ouvre la résiliation aux torts exclusifs et la saisie de la caution de bonne exécution (portée à confirmer selon le droit du marché, \aconfirmer).
+
+Les primitives cryptographiques d'ICES sont des standards publics (section~\ref{sec:primitives}) : l'administration n'a pas à défendre la fiabilité d'un algorithme propriétaire d'IntrepidCore.
+
+\subsection{Exclusion de garantie pour faute dolosive}
+
+Les contrats d'assurance excluent en général les pertes provenant d'une faute intentionnelle ou dolosive de l'assuré. La portée exacte de cette exclusion dans le Code des assurances de la CIMA est \aconfirmer{} par un cabinet spécialisé. Sous cette réserve, la preuve technique doit être qualifiée avec précision. Un sceau rompu, ou l'absence d'un sceau As-Built cohérent avec celui de l'APD, établit une \textbf{altération} du dossier. Il n'établit pas à lui seul une \textbf{intention} de tromper. La qualification de faute dolosive suppose une volonté délibérée que la partie adverse peut contester en invoquant une erreur de manipulation, une défaillance logicielle non fautive ou une compromission de clé dont le signataire n'est pas responsable. Le sceau facilite la preuve de l'intention : il écarte la défense fondée sur l'ignorance de l'altération et déplace le débat vers la seule question de l'intention. Une analyse jurisprudentielle avec un cabinet spécialisé reste un chantier de la feuille de route.
+
+L'engagement du BCT dans ce dispositif (section~\ref{sec:oracle}) suppose qu'il puisse assurer son rôle de témoin cryptographique au titre de sa responsabilité civile professionnelle. La couverture de ce rôle par les polices courantes est \aconfirmer{} auprès des assureurs. Un BCT dont le risque n'est pas assurable n'a pas d'incitation à s'engager, quelle que soit la solidité du mécanisme ; la négociation d'une extension de garantie conditionne donc la Phase~3. La mission ICES devrait devenir une ligne rémunérée du bordereau des prix du contrat de contrôle technique, au même titre que les missions normalisées existantes : un BCT non rémunéré pour cet acte de notarisation numérique risque de le traiter avec la complaisance des contrôles déjà défaillants.
+
+\subsection{Une prime réduite pour les chantiers scellés}
+
+Un mécanisme qui n'agit qu'au moment du sinistre produit une victoire juridique à coût social élevé : si l'assureur refuse de payer pour faute dolosive et que l'entreprise fait faillite, le maître d'ouvrage obtient gain de cause en droit sans obtenir le financement de la réparation. ICES doit aussi agir en amont, à la souscription. Un chantier dont le cycle complet (APD, EXE, As-Built) est scellé présente pour l'assureur un aléa moral réduit. L'hypothèse défendue ici est que les assureurs de la zone CIMA pourraient proposer des primes réduites ou des franchises préférentielles aux chantiers intégralement scellés. Cette hypothèse n'a pas été testée auprès d'assureurs (niveau exploratoire).
+
+\subsection{Le financement du sinistre}\label{sec:financement}
+
+Le financement de la réparation quand l'entreprise fautive a disparu reste ouvert ; le sceau ne le résout pas. Les instruments classiques de la commande publique (retenue de garantie renforcée, garantie à première demande, fonds de garantie sectoriel abondé par une fraction des primes réduites) restent nécessaires. ICES améliore la détection et la preuve de la faute, sans se substituer à l'ingénierie financière du risque résiduel.
+
+%% ═════════════════════════════════════════════════════════════
+\section{Gouvernance et gratuité du sceau}\label{sec:gouvernance}
+
+\subsection{Les précédents IFC et OCDS}
+
+Dans la commande publique européenne, la directive 2014/24/UE autorise les États à exiger des outils de modélisation des informations du bâtiment (BIM)~\cite{eu2014}. Les politiques de BIM s'appuient en pratique sur un \textbf{format ouvert}, l'Industry Foundation Classes (IFC), gouverné par une organisation indépendante à but non lucratif, buildingSMART International~\cite{buildingsmart}, plutôt que sur un logiciel. Des outils concurrents sont compatibles IFC sans que le format appartienne à l'un d'eux. L'Open Contracting Data Standard (OCDS) suit le même principe pour la transparence des marchés publics : une architecture de données publique, adoptée par de nombreux gouvernements, et non un logiciel à acheter~\cite{ocds}.
+
+\subsection{Une clause retirée parce qu'elle recréerait un monopole}
+
+Une première formulation d'exigence contractuelle ICES consisterait à demander \enquote{l'intégrité de la modélisation et la validité de la licence du solveur utilisé}. La seconde exigence recrée le monopole que la première cherche à éviter : elle revient à imposer LCPI par la contrainte administrative. L'article 48 de la directive 04/2005/CM/UEMOA interdit l'indication de marques, de brevets ou de types, ou d'une origine ou d'une production déterminée, sauf mention \enquote{ou équivalent} lorsque l'autorité contractante ne peut décrire l'objet du marché par des spécifications suffisamment précises~\cite{uemoa2005}. Une clause de ce type pourrait être contestée devant l'autorité de régulation des marchés publics compétente. La formulation retenue par ICES porte uniquement sur l'intégrité vérifiable du calcul, jamais sur l'identité de l'outil qui l'a produit.
+
+\begin{icesbox}[Clause recommandée pour les dossiers d'appel d'offres (DAO)]{vertAtlas}
+\enquote{Les notes de calcul hydraulique remises au titre du présent marché devront être scellées par un mécanisme de preuve cryptographique vérifiable hors ligne, conforme au standard ouvert ICES ou à tout protocole équivalent offrant un niveau de garantie mathématiquement comparable. La charge de la preuve de l'équivalence incombe au soumissionnaire.}
+
+\small Formulation à valider par un conseil juridique avant tout usage dans un dossier réel.
+\end{icesbox}
+
+Pour que la charge de la preuve d'équivalence ne devienne pas une barrière à l'entrée pour un petit bureau d'études, la gouvernance prévoit un outil de référence gratuit qui rend la conformité atteignable sans acheter de licence commerciale.
+
+\subsection{Le coût réel de la cession de gouvernance}
+
+Publier une spécification ouverte n'a de valeur juridique et commerciale que si l'entité qui édite le standard ne le contrôle pas seule. Cette cession a un coût qu'il vaut mieux chiffrer qu'euphémiser.
+
+\textbf{Ce qui est perdu.} Le droit de modifier unilatéralement la spécification pour avantager LCPI ; une voix formelle égale accordée aux concurrents dans l'organe de gouvernance ; la vitesse du contrôle unilatéral, remplacée par la lenteur du consensus à mesure que l'organe grandit.
+
+\textbf{Ce qui est conservé.} Le solveur stochastique LCPI, produit commercial distinct du standard ; la position d'auteur de l'implémentation de référence, qui oriente durablement l'évolution technique du standard indépendamment des règles formelles de vote ; la marque de conformité \enquote{ICES-Certified} et la suite de tests qui la définit (section~\ref{sec:conformite}), qui peuvent rester sous contrôle d'IntrepidCore après la cession de la spécification, sur le modèle de la certification USB-IF ou Wi-Fi Alliance ; la position de premier entrant sur l'intégration du registre de confiance.
+
+Le premier droit perdu, celui de contrôler seul la spécification, est celui dont la perte fait la valeur du standard : un format qu'IntrepidCore contrôlerait seule resterait, en droit, un format propriétaire, et la mention \enquote{ou équivalent} de l'article 48 ne tient que si ce contrôle n'existe pas. Le coût net de la cession se réduit donc à un ralentissement du rythme d'évolution une fois la gouvernance élargie, contre l'acquisition d'une légitimité juridique que le contrôle unilatéral ne peut pas produire.
+
+\subsection{Séquencement de la cession, licences et marque de conformité}\label{sec:conformite}
+
+La cession n'est ni immédiate ni indéfiniment différée. La spécification, les vecteurs de test et une implémentation de référence de vérification et de signature sont publiés dès la Phase~0. Les \textbf{licences} sont les suivantes : Apache~2.0 pour l'implémentation de référence, les outils et les vecteurs de test ; Creative Commons Attribution 4.0 International pour la spécification et ce livre blanc. Le dépôt public est hébergé sur GitHub ; un miroir sur une infrastructure neutre, géré par l'organe de gouvernance, est prévu mais n'existe pas à ce jour (niveau exploratoire). IntrepidCore reste membre fondateur, tient le secrétariat technique et l'implémentation de référence tant que l'organe de gouvernance n'a pas atteint des jalons d'adoption définis (nombre d'implémenteurs indépendants, entrée d'un régulateur ou d'un consortium sectoriel). Le contrôle du vote se transfère à mesure que ces jalons sont franchis, pas avant.
+
+IntrepidCore publie et maintient aussi une \textbf{suite de tests de conformité} (Compliance Test Matrix). Un éditeur tiers qui veut revendiquer \enquote{compatible ICES} soumet son implémentation à cette suite automatisée ; les vecteurs de test de la version 0.1 en sont le noyau. Le contrôle du standard peut être cédé sans céder le contrôle de ce que signifie s'y conformer.
+
+Cette marque n'est légitime que si elle ne devient pas un péage. Deux garde-fous l'en empêchent. D'abord, les \textbf{vecteurs de test sont publiés en clair} dès la Phase~0 : un implémenteur tiers vérifie lui-même sa conformité sans l'aval d'IntrepidCore, de sorte que la clause d'appel d'offres est satisfaite par la conformité \emph{vérifiable}, jamais par la détention du label. \enquote{ICES-Certified} reste une commodité de communication, non une condition d'éligibilité à un marché public. Ensuite, l'\textbf{implémentation de référence est publiée sous licence Apache~2.0}, ce qui permet à un tiers de reprendre légalement le développement si IntrepidCore cesse de la maintenir.
+
+\subsection{Gratuité du sceau et refus du verrou}\label{sec:gratuite}
+
+Un standard dont la vérification serait payante cesserait d'être un standard de confiance neutre et redeviendrait un péage contrôlé par son émetteur. ICES est \textbf{gratuit à produire et à vérifier} ; l'entrée dans la conformité est à coût nul, avec l'implémentation de référence qu'un bureau d'études utilise sans acheter de licence commerciale.
+
+Un standard ouvert expose IntrepidCore à un risque nommé : un éditeur concurrent peut implémenter ICES en quelques semaines et l'adjoindre à son propre outil sans jamais acheter LCPI. La commande publique gagnerait en intégrité, sans qu'IntrepidCore capte une part de ce gain. Une parade technique existe : filtrer, au niveau du registre de confiance, les sceaux produits par des implémentations dont l'empreinte de compilation ne figure pas sur une liste autorisée. Elle est rejetée ici pour trois raisons. Elle recrée la clause de validité de licence du solveur écartée plus haut : une liste de compilations autorisées est une liste de logiciels autorisés sous un autre nom. Elle recentralise dans le registre, conçu comme une couche d'attribution neutre, un pouvoir de police commerciale qui contredit sa raison d'être. Enfin, un standard qui se protège de l'implémentation libre par ses concurrents n'est pas le standard ouvert que la section~\ref{sec:gouvernance} revendique.
+
+La réponse retenue déplace la question. Si un solveur tiers suffit une fois équipé d'un sceau ICES, c'est que LCPI n'apportait pas sur ce segment une différenciation suffisante : un diagnostic sur LCPI, non un défaut d'ICES. Un standard qui profite à un concurrent de bonne foi a rempli sa mission d'assainissement de la commande publique ; c'est le critère de succès retenu.
+
+\subsection{Un produit commercial distinct du sceau}
+
+Le solveur stochastique LCPI est un produit commercial distinct du sceau, qui reste gratuit à chaque phase. Son prix par palier devrait refléter les heures de prestation que chaque palier inclut (formation, support, mises à jour, qualification) et les économies de dimensionnement qu'il permet. Aucun montant n'est publié dans ce document, et aucun ne devrait l'être avant d'avoir été mesuré auprès des utilisateurs.
+
+%% ════════════════════════════════════════════════════════════
+\IEpart{La feuille de route et les limites}{D05}
+
+\section{Feuille de route et état d'avancement}\label{sec:feuille-de-route}
+
+La figure~\ref{fig:roadmap} situe les six phases de gouvernance. Les échéances sont exprimées en mois écoulés depuis la publication prévue le 2 novembre 2026 ; ce sont des cibles de planification, non des engagements contractuels.
+
+\fig{fig_roadmap}{0.94}{fig:roadmap}{La feuille de route indicative compte six phases, de la publication du standard bien public (Phase~0) à la gouvernance sectorielle élargie (Phase~5), sur vingt-quatre mois.}{Diagramme de Gantt de six phases sur vingt-quatre mois à partir de novembre 2026, avec les mois de début et de fin écrits sur chaque barre.}
+
+\begin{description}[leftmargin=0pt,labelsep=0.6em]
+  \item[Phase~0, standard bien public.] Publication de la spécification, des vecteurs de test et du vérificateur de référence, sous licence Apache~2.0 pour le code et Creative Commons Attribution 4.0 pour les textes. Fondation de l'organe de gouvernance, IntrepidCore fondateur et secrétariat technique ; marque de conformité et suite de tests maintenues séparément (section~\ref{sec:conformite}).
+  \item[Phase~1, ingénierie conventionnelle.] ICES scelle des calculs déterministes normatifs (Fascicule~71, Hardy-Cross), indépendamment de toute validation du moteur stochastique de LCPI. Cette phase découple l'adoption d'ICES de la maturité scientifique de LCPI. Le format du sceau porte dès cette phase un numéro de version : un sceau de Phase~1 reste vérifiable indéfiniment, les phases suivantes ajoutant des champs sans invalider un format antérieur.
+  \item[Phase~2, attribution.] Déploiement des clés opérationnelles à durée de vie courte, de l'horodatage en deux paliers, du journal de révocation asynchrone (section~\ref{sec:cles}), des profils de sécurité des signataires (section~\ref{sec:profils}) et de la cérémonie de clé racine à seuil (section~\ref{sec:racine}).
+  \item[Phase~3, responsabilité et confiance publique.] Déploiement du Manifeste de Projet et de la chaîne de garde (section~\ref{sec:garde}), intégration de la co-signature du BCT dans le flux de récolement une fois son assurabilité résolue (section~\ref{sec:juridique}), et transfert progressif du registre vers une autorité publique ou professionnelle, le consortium de gouvernance restant détenteur de repli.
+  \item[Phase~4, solveur commercial distinct.] Le moteur stochastique de LCPI est proposé comme produit commercial superposé au sceau gratuit, après la revue par les pairs décrite plus bas.
+  \item[Phase~5, standard sectoriel.] Gouvernance élargie, registre public, audit cryptographique indépendant de l'implémentation de référence réalisé et publié. ICES entre dans les modèles de dossiers d'appel d'offres par la clause \enquote{ou équivalent} de l'article 48, sur un fondement juridique consolidé.
+\end{description}
+
+Le tableau~\ref{tab:maturite} distingue ce que la version 0.1 implémente de ce qui reste à construire. Le niveau d'affirmation suit le guide de rédaction d'IntrepidCore : \emph{vérifié} suppose une méthode reproductible et un corpus identifié, \emph{exploratoire} une idée ou un résultat préliminaire aux limites explicites.
+
+\begin{table}[H]\centering\small
+\caption{État d'avancement des mécanismes d'ICES au 25 octobre 2026 et niveau d'affirmation.}\label{tab:maturite}
+\begin{tabularx}{\linewidth}{@{}Xp{2.5cm}p{1.5cm}@{}}
+\toprule
+\textbf{Mécanisme} & \textbf{Niveau d'affirmation} & \textbf{Phase} \\
+\midrule
+Arrondi par champ et canonicalisation JCS : implémentés dans le vérificateur de référence, testés sur l'exemple de la RFC~8785 et sur les vecteurs publics & vérifié & 0 \\
+Condensat SHA3-256 et signature Ed25519, avec identifiant \texttt{did:key} & vérifié & 0 \\
+Liste locale de clés de confiance, avec date de validité et révocation, refus par défaut & vérifié & 0 \\
+Vérificateur de production, binaire Rust hors ligne & exploratoire & 0 \\
+Journal de transparence et moniteurs tiers & exploratoire & 2 \\
+Clés courtes, horodatage en deux paliers, attestation agrafée & exploratoire & 2 \\
+Cérémonie de clé racine à seuil & exploratoire & 2 \\
+Manifeste de Projet, chaîne de garde, co-signature du BCT & exploratoire & 3 \\
+Exécution reproductible en WebAssembly & exploratoire & à définir \\
+Qualification juridique, audit cryptographique indépendant & exploratoire & 5 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{État de la validation scientifique du moteur stochastique}
+
+Le moteur stochastique de LCPI, distinct du sceau ICES, est calibré sur un périmètre géographique restreint et n'a pas été soumis à la revue par les pairs. La soumission d'un article et la publication d'un préprint sont prévues pour la fin de l'année 2026 et le début de 2027, avant toute exploitation commerciale à grande échelle du volet stochastique. Cette validation est un jalon à venir. Elle ne conditionne pas le sceau, dont les primitives sont des standards publics indépendants de LCPI ; c'est ce qui justifie le séquencement de la Phase~1.
+
+Toute affirmation de robustesse du mécanisme cryptographique repose, dans ce document, sur des sources externes que n'importe quel tiers peut vérifier (spécifications de l'Internet Engineering Task Force (IETF) et du NIST, articles de cryptographie publiés), plutôt que sur une évaluation interne à IntrepidCore.
+
+%% ═════════════════════════════════════════════════════════════
+\section{Limites et non-objectifs}\label{sec:limites}
+
+Cette section liste ce qu'ICES ne fait pas.
+
+\textbf{ICES ne détecte pas une substitution physique au moment où elle survient.} Il la rend attribuable et coûteuse à dissimuler durablement (section~\ref{sec:oracle}), sans l'empêcher.
+
+\textbf{ICES ne remplace pas le contrôle technique réglementaire.} Le BCT reste l'acteur de terrain ; sa capacité à assumer son rôle dépend de conditions économiques et assurantielles extérieures à ICES (section~\ref{sec:juridique}).
+
+\textbf{ICES n'est pas, à ce jour, une signature électronique qualifiée.} La présomption légale de fiabilité qui accompagne cette qualification n'existe pas encore pour lui (section~\ref{sec:juridique}).
+
+\textbf{ICES ne garantit pas la qualité d'une ingénierie.} Un calcul rigoureusement scellé peut reposer sur des hypothèses hydrauliques erronées ou sous-dimensionnées ; le sceau atteste l'intégrité et l'attribution d'un résultat, jamais sa justesse.
+
+\textbf{ICES ne résout pas le financement d'un sinistre} lorsque l'entreprise responsable a disparu. Cette limite relève des instruments d'assurance et de garantie de la section~\ref{sec:financement}.
+
+\textbf{ICES ne dispense pas d'une gouvernance de clé rigoureuse.} La sécurité du dispositif dépend de la qualité d'exécution du registre de confiance, du Manifeste de Projet et de la cérémonie de clé racine (section~\ref{sec:confiance}). Un registre mal opéré ou un dispositif de signature mal protégé annule l'attribution, quelle que soit la solidité des primitives.
+
+\textbf{ICES n'établit pas, à lui seul, l'authenticité d'une preuve de terrain.} Sceller une donnée falsifiée à la source ne la rend pas plus vraie (section~\ref{sec:oracle}).
+
+\textbf{La version 0.1 n'implémente ni l'attribution à grande échelle ni la chaîne de garde.} Le tableau~\ref{tab:maturite} indique ce qui est vérifié et ce qui reste exploratoire.
+
+%% ════════════════════════════════════════════════════════════
+\appendix
+\renewcommand{\thesection}{\Alph{section}}
+\renewcommand{\thesubsection}{\Alph{section}.\arabic{subsection}}
+\titleformat{\section}{\normalfont\fontsize{14}{16}\bfseries\color{intrepid}}{Annexe~\thesection.}{0.6em}{}
+\setcounter{section}{0}
+\phantomsection\addcontentsline{toc}{part}{Annexes}
+\IEopener{Annexes}{Spécification, vecteurs de test et glossaire}{A05}
+
+\section{Spécification technique de la version 0.1}\label{sec:annexe}
+
+Cette annexe résume la spécification ICES v0.1. Le texte intégral, le schéma JSON (\texttt{mission-\allowbreak bundle.\allowbreak schema.\allowbreak json}), le vérificateur de référence et les vecteurs de test sont dans le dépôt \texttt{intrepidcore-ices}. Si le schéma, le code ou la spécification divergent de ce livre blanc, le livre blanc fait foi et les artefacts sont corrigés.
+
+\subsection{Le MissionBundle}\label{sec:spec-schema}
+
+Un MissionBundle est un objet JSON en six blocs (tableau~\ref{tab:blocs}). Les blocs \texttt{header}, \texttt{gates} et \texttt{ices\_envelope} sont identiques quel que soit le produit émetteur ; \texttt{inputs} et \texttt{outputs} portent une partie universelle et une partie propre au domaine (\texttt{aep}, \texttt{hydro}, \texttt{atlas}, \texttt{igniscore}), validée par des règles conditionnelles du schéma.
+
+\begin{table}[H]\centering\small
+\caption{Les six blocs d'un MissionBundle de la version 0.1.}\label{tab:blocs}
+\begin{tabularx}{\linewidth}{@{}p{2.4cm}p{3.0cm}X@{}}
+\toprule
+\textbf{Bloc} & \textbf{Signé} & \textbf{Contenu} \\
+\midrule
+\texttt{header} & \texttt{engine\_version} & \texttt{schema\_version}, \texttt{project\_key}, \texttt{domain}, \texttt{engine\_version} (identifiant neutre du moteur émetteur), date de création, plage de phases \\
+\texttt{inputs} & oui & Configuration canonique et registre de valeurs par défaut (universels) ; réseau, références géographiques, géostatistique ou mélange de biomasse selon le domaine \\
+\texttt{scenario} & oui, s'il existe & Graine d'ensemble, nombre de réalisations, axes d'incertitude ; absent pour le domaine \texttt{atlas} \\
+\texttt{outputs} & oui & Distribution, coûts et robustesse (hydraulique) ; réalisations (Atlas) ; BioCore (IgnisCore) \\
+\texttt{gates} & oui & Contrôles avec leur statut \texttt{PASS}, \texttt{WARN} ou \texttt{FAIL} : la preuve inclut aussi les échecs \\
+\texttt{ices\_envelope} & non & Le sceau (tableau~\ref{tab:enveloppe}) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Le sceau}
+
+L'enveloppe \texttt{ices\_envelope} porte sept champs (tableau~\ref{tab:enveloppe}).
+
+\begin{table}[H]\centering\small
+\caption{Les champs de l'enveloppe \texttt{ices\_envelope}.}\label{tab:enveloppe}
+\begin{tabularx}{\linewidth}{@{}p{2.4cm}X@{}}
+\toprule
+\textbf{Champ} & \textbf{Contenu} \\
+\midrule
+\texttt{alg} & Algorithme de signature : \texttt{Ed25519} \\
+\texttt{digest\_alg} & Algorithme de condensat : \texttt{SHA3-256} \\
+\texttt{digest} & Condensat de la section~\ref{sec:canon}, en hexadécimal (64 caractères) \\
+\texttt{sig} & Signature Ed25519 du condensat (32 octets), en base64 \\
+\texttt{pubkey} & Clé publique Ed25519, en base64 ou sous la forme \texttt{did:key:z6Mk\ldots} \\
+\texttt{signed\_at} & Date de signature déclarée par l'émetteur (horodatage de palier~1) \\
+\texttt{key\_id} & Identifiant de la clé dans la liste de clés de confiance \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+L'extrait suivant provient du vecteur \texttt{example-bundle.json}.
+
+\begin{code}
+"ices_envelope": {
+  "alg": "Ed25519",
+  "digest_alg": "SHA3-256",
+  "digest": "2028f4be7a414290a3f69884489f734bc95ec787d67cd9ab25e9c324f3e40331",
+  "sig": "gn+Eq4YFjwkI+yj6MQr90bKRCeyhcq02OAzpFY93/kiYN0she9cRHkyBkqv54yFkt/ddE+SAakjnCc9Om6TFAA==",
+  "pubkey": "zO6uRfxEy6mSTX/niFkMJOB38p4OW4c1UHahv4qhk+k=",
+  "signed_at": "2026-06-30T10:00:01Z",
+  "key_id": "demo-aep-01"
+}
+\end{code}
+
+\subsection{Canonicalisation et précision par champ}\label{sec:spec-precision}
+
+Le condensat se calcule ainsi, dans cet ordre, sans séparateur entre les termes :
+\[
+\texttt{digest} = \text{SHA3-256}\big(\,C(\texttt{inputs})\ \Vert\ C(\texttt{scenario})\ \Vert\ \texttt{engine\_version}\ \Vert\ C(\texttt{outputs})\ \Vert\ C(\texttt{gates})\,\big)
+\]
+où $C$ applique l'arrondi par champ puis la sérialisation JCS en UTF-8, et où \texttt{engine\_version} entre tel quel, en UTF-8. La signature est \texttt{sig} $=$ Ed25519(\texttt{digest}, clé privée), calculée sur les 32 octets du condensat. Les règles d'arrondi sont les suivantes : arrondi au plus proche, égalité vers le pair, calculé sur la représentation décimale la plus courte du nombre ; les entiers et les booléens ne sont pas modifiés ; un champ nommé dans le tableau~\ref{tab:precision} impose sa précision à tous les nombres flottants qu'il contient, y compris dans des listes ; tout autre nombre flottant est arrondi à 6 décimales.
+
+\begin{table}[H]\centering\small
+\caption{Nombre de décimales par champ avant la canonicalisation JCS.}\label{tab:precision}
+\begin{tabularx}{\linewidth}{@{}Xrl@{}}
+\toprule
+\textbf{Grandeur et noms de champ} & \textbf{Décimales} & \textbf{Unité} \\
+\midrule
+Diamètre nominal : \texttt{diametre\_mm}, \texttt{diameters\_mm} & 0 & mm \\
+Pression de service : \texttt{pression\_bar}, \texttt{pressure\_bar} & 3 & bar \\
+Débit : \texttt{debit\_m3h}, \texttt{flow\_m3h} & 4 & m\textsuperscript{3}/h \\
+Cote altimétrique : \texttt{cote\_m}, \texttt{elevation\_m} & 3 & m \\
+Coefficient de rugosité de Hazen-Williams : \texttt{rugosite\_hw}, \texttt{roughness\_hw} & 2 & sans dimension \\
+Indices de résilience, d'équité et de service : \texttt{resilience\_outage}, \texttt{equity\_index}, \texttt{p\_service\_ge\_target}, \texttt{resilience\_index}, \texttt{cot}, \texttt{eens}, \texttt{lowlp} & 6 & sans dimension \\
+Coordonnées : \texttt{latitude}, \texttt{longitude} & 7 & degrés décimaux \\
+Tout autre nombre flottant & 6 & selon le champ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Deux implémentations conformes appliquent strictement ce tableau : diverger produit un condensat différent pour un même calcul. Les chemins machine sont remplacés par des empreintes avant le hachage, jamais écrits en chemin absolu, et la géométrie est alignée sur une grille avant la canonicalisation, du côté de l'émetteur.
+
+\subsection{Vérification et vecteurs de test}
+
+Le tableau~\ref{tab:vecteurs} liste les vecteurs de test publics. Toute implémentation de vérificateur doit produire ces six résultats.
+
+\begin{table}[H]\centering\small
+\caption{Les six vecteurs de test et le verdict attendu pour chacun.}\label{tab:vecteurs}
+\begin{tabularx}{\linewidth}{@{}p{5.6cm}Xr@{}}
+\toprule
+\textbf{Fichier} & \textbf{Verdict attendu} & \textbf{Code} \\
+\midrule
+\texttt{example-bundle.json} & Conforme : domaine \texttt{aep}, clé enrôlée & 0 \\
+\texttt{example-bundle-atlas.json} & Conforme : domaine \texttt{atlas}, clé enrôlée & 0 \\
+\texttt{tampered-bundle.json} & Rejeté : le CAPEX a été modifié après la signature, intégrité en échec & 1 \\
+\texttt{unenrolled-bundle.json} & Rejeté : signature valide, clé absente de la liste de confiance & 1 \\
+\texttt{revoked-bundle.json} & Rejeté : signature valide, clé révoquée avant la date de signature & 1 \\
+\texttt{malformed-bundle.json} & Non vérifiable : champ obligatoire supprimé & 2 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Les deux sorties ci-dessous sont celles du vérificateur de référence, exécuté avec la liste de clés \texttt{trusted-\allowbreak keys.json}.
+
+\begin{code}
+$ python ices_verify.py example-bundle.json --trusted-keys trusted-keys.json
+Sceau ICES ............................ CONFORME
+Condensat SHA3-256 .................... 2028f4be7a414290a3f69884489f734bc95ec787d67cd9ab25e9c324f3e40331
+Intégrité (recalcul) .................. OK
+Signature Ed25519 ..................... VALIDE
+Signataire ............................ demo-aep-01 (clé enrôlée)
+Identifiant de clé .................... did:key:z6MktFEJid4R1kMwm6z6zh99kVZ8Z1b2diKXyzJkuuhKiw8t
+Manifeste de Projet ................... non vérifié (Phase 3 de la feuille de route)
+
+$ python ices_verify.py tampered-bundle.json --trusted-keys trusted-keys.json
+Sceau ICES ............................ REJETÉ
+Intégrité (recalcul) .................. ÉCHEC : le contenu a changé après la signature
+Signature Ed25519 ..................... VALIDE
+\end{code}
+
+\subsection{Extensions prévues, non normatives en version 0.1}\label{sec:spec-ext}
+
+Les formats suivants décrivent les phases~2 et~3 de la feuille de route. Ils ne sont pas implémentés dans la version 0.1 et peuvent évoluer. Le tableau~\ref{tab:manifeste} décrit le Manifeste de Projet (section~\ref{sec:garde}).
+
+\begin{table}[H]\centering\small
+\caption{Champs prévus du Manifeste de Projet.}\label{tab:manifeste}
+\begin{tabularx}{\linewidth}{@{}p{2.8cm}X@{}}
+\toprule
+\textbf{Champ} & \textbf{Contenu} \\
+\midrule
+\texttt{manifest\_id} & Identifiant public unique du marché, attribué par l'autorité contractante \\
+\texttt{issuer\_did} & \texttt{did:key} de l'autorité contractante émettrice \\
+\texttt{authorized\_keys} & Liste \texttt{\{did, phase\}} : une entrée par clé autorisée et la phase (APD, EXE, As-Built) pour laquelle elle l'est \\
+\texttt{tolerance} & Écart maximal toléré entre sceaux successifs, par grandeur \\
+\texttt{issued\_at} & Date d'émission, à l'attribution du marché \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+L'état de révocation synchronisé par le vérificateur (section~\ref{sec:cles}) est une liste plate, conçue pour tenir sur un support de transport minimal.
+
+\begin{code}
+{
+  "issued_at": "2026-11-02T00:00:00Z",
+  "valid_until": "2026-11-09T00:00:00Z",
+  "merkle_root": "<racine de l'arbre de Merkle, en hexadécimal>",
+  "revoked": [
+    { "did": "did:key:z6Mk...", "revoked_at": "2026-11-01T14:32:00Z", "reason": "key_theft" }
+  ]
+}
+\end{code}
+
+Le champ \texttt{valid\_until} fixe le seuil de fraîcheur maximal : un vérificateur dont la dernière synchronisation lui est postérieure refuse tout sceau par défaut (\emph{fail-closed}). La fenêtre recommandée en Phase~2 est de sept jours ; une autorité contractante peut la resserrer pour des ouvrages à enjeu élevé.
+
+\needspace{14\baselineskip}
+\section{Glossaire}\label{sec:glossaire}
+
+Le tableau~\ref{tab:glossaire} définit les termes et acronymes de ce document.
+
+\begin{table}[H]\centering\small
+\caption{Glossaire des termes et acronymes employés dans ce livre blanc.}\label{tab:glossaire}
+\begin{tabularx}{\linewidth}{@{}p{3.2cm}X@{}}
+\toprule
+\textbf{Terme} & \textbf{Définition} \\
+\midrule
+As-Built & Dossier de l'ouvrage tel que construit, établi au récolement \\
+APD & Avant-projet détaillé, phase d'étude qui fixe le dimensionnement contractuel de l'ouvrage \\
+EXE & Études d'exécution, reprise du dimensionnement par l'entreprise adjudicataire avant les travaux \\
+BCT & Bureau de contrôle technique, tiers indépendant chargé de prévenir les aléas techniques \\
+CCTP, CCAP & Cahier des clauses techniques particulières, cahier des clauses administratives particulières \\
+DAO & Dossier d'appel d'offres \\
+UEMOA & Union économique et monétaire ouest-africaine \\
+CIMA & Conférence interafricaine des marchés d'assurances \\
+PSCQ & Prestataire de services de confiance qualifié, accréditation qui confère la présomption légale de fiabilité \\
+Condensat & Empreinte SHA3-256 de 32 octets calculée sur les blocs canonicalisés \\
+Sceau & Enveloppe \texttt{ices\_envelope} : condensat, signature, clé publique, date et identifiant de clé \\
+MissionBundle & Objet JSON scellé par ICES, qui porte entrées, scénario, résultats et contrôles \\
+JCS & JSON Canonicalization Scheme, RFC~8785, forme canonique unique d'un document JSON \\
+\texttt{did:key} & Identifiant de clé publique auto-descriptif, sans autorité de certification centrale \\
+Attestation agrafée & Preuve de validité d'une clé embarquée dans le sceau au moment de la signature \\
+Manifeste de Projet & Objet cryptographique qui lie un marché public aux clés autorisées par phase \\
+Palier d'horodatage & Niveau de preuve temporelle : palier~1, horloge locale du dispositif ; palier~2, ancrage auprès d'une autorité RFC~3161 \\
+Moniteur tiers & Organisation indépendante qui synchronise et audite publiquement le journal de transparence \\
+Partage de Shamir & Schéma cryptographique qui répartit un secret entre plusieurs porteurs, reconstituable à partir d'un seuil \\
+Agilité cryptographique & Capacité d'un format à identifier son algorithme et à en changer sans invalider les données existantes \\
+Fail-closed & Comportement par défaut qui refuse un sceau quand une information de confiance manque ou est périmée \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+%% ════════════════════════════════════════════════════════════
+\clearpage
+\printbibliography[heading=bibintoc,title={Références}]
+
+\clearpage
+\thispagestyle{empty}
+\section*{Statut et signatures}
+Ce tableau est renseigné par les seuls titulaires de chaque rôle, à l'approbation du document. Une case vide signifie que la signature n'est pas apposée (tableau~\ref{tab:signatures}).
+
+\begin{table}[H]\centering\small
+\caption{Rôles de gouvernance, titulaires et signatures du livre blanc, version 4.0.}\label{tab:signatures}
+\renewcommand{\arraystretch}{2.2}
+\begin{tabularx}{\linewidth}{@{}p{3.9cm}p{3.6cm}p{2.2cm}X@{}}
+\toprule
+\textbf{Rôle} & \textbf{Titulaire} & \textbf{Date} & \textbf{Signature} \\
+\midrule
+Auteur & Serge TABE DJATO & & \\
+Relecteur technique & CTO & & \\
+Relecteur juridique & à désigner & & \\
+Approbateur & CEO & & \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+{\small\textbf{Licence.} Creative Commons Attribution 4.0 International, \textcopyright{} 2026 Serge TABE DJATO. Les logos et les noms IntrepidCore, IntrepidLab et ICES ne sont pas concédés. Pour citer ce livre blanc, utiliser le fichier \texttt{CITATION.cff} du dépôt \texttt{intrepidcore-ices}.}
+
+\label{LastBody}
+\end{document}

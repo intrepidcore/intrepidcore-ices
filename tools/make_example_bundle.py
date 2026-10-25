@@ -1,47 +1,59 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2026 Serge TABE DJATO
-"""Signataires de référence ICES (squelette du finalize() côté noyau).
+"""Génère les vecteurs de test ICES (dossier test-vectors/).
 
-Génère une paire de clés Ed25519, construit deux MissionBundle d'exemple
-(domaine aep et domaine atlas — preuve que le schéma généralisé v2 couvre
-plusieurs produits), calcule le condensat canonique et appose le sceau.
-Sert de fixture de test pour le vérificateur et de référence
-d'implémentation pour toute implémentation native du sceau.
+Chaque exécution tire de nouvelles clés de démonstration : les vecteurs publiés
+dans le dépôt sont ceux d'une exécution précise, et la liste des clés de
+confiance (trusted-keys.json) en est issue. Ne jamais réutiliser ces clés.
+
+Vecteurs produits :
+  example-bundle.json         domaine aep, sceau valide, clé enrôlée          -> CONFORME
+  example-bundle-atlas.json   domaine atlas, sceau valide, clé enrôlée        -> CONFORME
+  tampered-bundle.json        un résultat modifié après la signature          -> REJETÉ (intégrité)
+  unenrolled-bundle.json      sceau valide, clé absente de la liste           -> REJETÉ (clé non enrôlée)
+  revoked-bundle.json         sceau valide, clé révoquée avant la signature   -> REJETÉ (clé révoquée)
+  malformed-bundle.json       champ obligatoire supprimé                      -> NON VÉRIFIABLE (code 2)
+  trusted-keys.json           liste des clés de confiance de démonstration
 """
 import base64
+import copy
 import json
 import sys
 from pathlib import Path
 
+from nacl.signing import SigningKey
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "verifier" / "python"))
-from ices_verify import compute_digest  # noqa: E402
+from ices_verify import compute_digest, did_key  # noqa: E402
 
-from nacl.signing import SigningKey  # noqa: E402
+SORTIE = Path(__file__).resolve().parents[1] / "test-vectors"
+SIGNE_LE = "2026-06-30T10:00:01Z"
 
-HERE = Path(__file__).resolve().parents[1] / "test-vectors"
 
-
-def sign_and_write(bundle: dict, filename: str) -> None:
+def sceller(bundle: dict, sk: SigningKey, key_id: str) -> dict:
     """finalize() : condensat canonique puis signature Ed25519."""
-    sk = SigningKey.generate()
-    digest_hex = compute_digest(bundle)
-    sig = sk.sign(bytes.fromhex(digest_hex)).signature
-    bundle["ices_envelope"] = {
+    b = copy.deepcopy(bundle)
+    b.pop("ices_envelope", None)
+    digest = compute_digest(b)
+    b["ices_envelope"] = {
         "alg": "Ed25519",
         "digest_alg": "SHA3-256",
-        "digest": digest_hex,
-        "sig": base64.b64encode(sig).decode(),
+        "digest": digest,
+        "sig": base64.b64encode(sk.sign(bytes.fromhex(digest)).signature).decode(),
         "pubkey": base64.b64encode(bytes(sk.verify_key)).decode(),
-        "signed_at": "2026-06-30T10:00:01Z",
-        "key_id": "fde-demo-01",
+        "signed_at": SIGNE_LE,
+        "key_id": key_id,
     }
-    (HERE / filename).write_text(
-        json.dumps(bundle, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"{filename} signé et écrit.")
+    return b
 
 
-# ── Domaine aep (LCPI hydraulique) ──────────────────────────────────────
+def ecrire(nom: str, contenu) -> None:
+    (SORTIE / nom).write_text(json.dumps(contenu, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"{nom} écrit.")
+
+
+# ── Domaine aep (hydraulique) ───────────────────────────────────────────
 bundle_aep = {
     "header": {
         "schema_version": 2,
@@ -81,13 +93,13 @@ bundle_aep = {
     ],
 }
 
-# ── Domaine atlas (pipeline géostatistique) — preuve de généralisation ──
+# ── Domaine atlas (pipeline géostatistique), preuve de généralisation ───
 bundle_atlas = {
     "header": {
         "schema_version": 2,
         "project_key": "DEMO-ATLAS-GOLFE",
         "domain": "atlas",
-        "engine_version": "L1-L5@9f8e7d",  # version du pipeline geostat, PAS un sha LCPI
+        "engine_version": "L1-L5@9f8e7d",
         "created_utc": "2026-06-30T11:00:00Z",
         "phase_range": {"from": "L1", "to": "L5"},
     },
@@ -114,5 +126,39 @@ bundle_atlas = {
     ],
 }
 
-sign_and_write(bundle_aep, "example-bundle.json")
-sign_and_write(bundle_atlas, "example-bundle-atlas.json")
+# ── Clés de démonstration ───────────────────────────────────────────────
+sk_aep, sk_atlas = SigningKey.generate(), SigningKey.generate()
+sk_inconnue, sk_revoquee = SigningKey.generate(), SigningKey.generate()
+
+
+def entree(key_id: str, sk: SigningKey, revoquee_le=None) -> dict:
+    return {
+        "key_id": key_id,
+        "pubkey": base64.b64encode(bytes(sk.verify_key)).decode(),
+        "did": did_key(bytes(sk.verify_key)),
+        "valid_from": "2026-01-01T00:00:00Z",
+        "revoked_at": revoquee_le,
+    }
+
+
+ecrire("trusted-keys.json", [
+    entree("demo-aep-01", sk_aep),
+    entree("demo-atlas-01", sk_atlas),
+    entree("demo-revoquee-01", sk_revoquee, revoquee_le="2026-06-30T10:00:00Z"),
+])
+
+aep = sceller(bundle_aep, sk_aep, "demo-aep-01")
+ecrire("example-bundle.json", aep)
+ecrire("example-bundle-atlas.json", sceller(bundle_atlas, sk_atlas, "demo-atlas-01"))
+
+# Falsification : un résultat change après la signature, sans resigner.
+falsifie = copy.deepcopy(aep)
+falsifie["outputs"]["costs"]["capex_fcfa"] = 137965644.5
+ecrire("tampered-bundle.json", falsifie)
+
+ecrire("unenrolled-bundle.json", sceller(bundle_aep, sk_inconnue, "demo-inconnue-01"))
+ecrire("revoked-bundle.json", sceller(bundle_aep, sk_revoquee, "demo-revoquee-01"))
+
+malforme = copy.deepcopy(aep)
+del malforme["header"]["engine_version"]
+ecrire("malformed-bundle.json", malforme)

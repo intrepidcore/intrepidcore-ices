@@ -1,23 +1,29 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2026 Serge TABE DJATO
-# Développeur: IntrepidCore — ICES reference verifier (squelette v0.1)
-# Contact: contact@intrepidcore.io
-#
-# ICES verify — vérificateur de référence HORS-LIGNE du MissionBundle.
-#
-# Ce que ce squelette démontre (le contrat ICES) :
-#   1. Canonicalisation déterministe des sous-objets signés.
-#   2. Recalcul du condensat SHA3-256 sur la séquence canonique.
-#   3. Vérification de la signature Ed25519 avec la clé PUBLIQUE.
-#      => aucun secret partagé. Un bailleur exécute ceci seul.
-#
-# Cible de production : crate Rust `ices-core` (ed25519-dalek + sha3),
-# binaire statique distribuable offline (zones CEDEAO sans connectivité).
-# Ce script Python est le squelette de référence / banc de test.
-#
-# Dépendances : pip install pynacl   (Ed25519 via libsodium)
+"""ICES verify : vérificateur de référence hors ligne du MissionBundle (Python).
 
+Il applique la spécification ICES v0.1 et le livre blanc ICES v4.0 :
+
+1. Canonicalisation : arrondi à précision fixée par champ (annexe A du livre
+   blanc), puis sérialisation JSON Canonicalization Scheme (JCS, RFC 8785).
+2. Condensat SHA3-256 de
+   canon(inputs) || canon(scenario) || engine_version || canon(outputs) || canon(gates),
+   dans cet ordre (spécification, section 3). Un bundle sans `scenario` omet ce terme.
+3. Signature Ed25519 vérifiée avec la clé publique du sceau.
+4. Ancrage de confiance : la clé du sceau doit figurer dans la liste de clés de
+   confiance fournie (`--trusted-keys`) et ne pas avoir été révoquée à la date de
+   signature. Sans liste, le vérificateur refuse (fail-closed) ; `--integrity-only`
+   limite explicitement la vérification à l'intégrité.
+
+Non couvert par cette version (Phases 2 et 3 de la feuille de route) : horodatage
+en deux paliers, attestation agrafée, Manifeste de Projet, journal de transparence.
+
+Codes de sortie : 0 conforme, 1 rejeté, 2 non vérifiable (fichier malformé, option
+manquante).
+
+Dépendance : pip install pynacl
+"""
 from __future__ import annotations
 
 import argparse
@@ -25,146 +31,302 @@ import base64
 import hashlib
 import json
 import sys
+from datetime import datetime, timezone
+from decimal import ROUND_HALF_EVEN, Decimal
 from pathlib import Path
 from typing import Any
 
 try:
-    from nacl.signing import VerifyKey
     from nacl.exceptions import BadSignatureError
+    from nacl.signing import VerifyKey
 except ImportError:  # pragma: no cover
     VerifyKey = None  # type: ignore
     BadSignatureError = Exception  # type: ignore
 
-# Ordre canonique des champs entrant dans le condensat (NON négociable :
-# tout écart fait dériver le hash). Doit être identique côté signataire.
-SIGNED_FIELDS = ("inputs", "scenario", "outputs", "gates")
-
-FLOAT_PRECISION = 6  # arrondi des flottants à précision fixe
-
-
 # ─────────────────────────────────────────────────────────────────────────
-# 1. Canonicalisation déterministe
+# 1. Table de précision par champ (livre blanc, annexe A)
 # ─────────────────────────────────────────────────────────────────────────
-def canonicalize(obj: Any) -> Any:
-    """Forme canonique : clés triées, flottants arrondis, listes préservées.
+PRECISION_DEFAUT = 6
+PRECISION_PAR_CHAMP: dict[str, int] = {
+    "diametre_mm": 0, "diameters_mm": 0,
+    "pression_bar": 3, "pressure_bar": 3,
+    "debit_m3h": 4, "flow_m3h": 4,
+    "cote_m": 3, "elevation_m": 3,
+    "rugosite_hw": 2, "roughness_hw": 2,
+    "resilience_outage": 6, "equity_index": 6, "p_service_ge_target": 6,
+    "resilience_index": 6, "cot": 6, "eens": 6, "lowlp": 6,
+    "latitude": 7, "longitude": 7,
+}
 
-    Règle d'or : même entrée logique -> même octets, sur toute machine.
-    Les chemins absolus doivent déjà avoir été remplacés par des empreintes
-    en amont (au finalize()), jamais ici.
-    """
+
+class MalformedBundle(Exception):
+    """Le fichier ne peut pas être vérifié : structure absente ou invalide."""
+
+
+def arrondir(x: float, decimales: int) -> float:
+    """Arrondi au plus proche, égalité vers le pair, sur la représentation
+    décimale la plus courte de x (résultat identique sur toute plateforme)."""
+    q = Decimal(1).scaleb(-decimales)
+    return float(Decimal(repr(x)).quantize(q, rounding=ROUND_HALF_EVEN))
+
+
+def appliquer_precision(obj: Any, decimales: int | None = None) -> Any:
+    """Parcourt le document ; un champ nommé dans la table impose sa précision
+    à tous les nombres flottants qu'il contient, sinon PRECISION_DEFAUT."""
     if isinstance(obj, dict):
-        return {k: canonicalize(obj[k]) for k in sorted(obj.keys())}
+        return {k: appliquer_precision(v, PRECISION_PAR_CHAMP.get(k, decimales)) for k, v in obj.items()}
     if isinstance(obj, list):
-        return [canonicalize(v) for v in obj]
+        return [appliquer_precision(v, decimales) for v in obj]
     if isinstance(obj, bool):
         return obj
     if isinstance(obj, float):
-        return round(obj, FLOAT_PRECISION)
+        return arrondir(obj, PRECISION_DEFAUT if decimales is None else decimales)
     return obj
 
 
-def canonical_bytes(value: Any) -> bytes:
-    """Sérialisation canonique stable (UTF-8, séparateurs compacts, clés triées)."""
-    return json.dumps(
-        canonicalize(value),
-        ensure_ascii=False,
-        separators=(",", ":"),
-        sort_keys=True,
-    ).encode("utf-8")
+# ─────────────────────────────────────────────────────────────────────────
+# 2. Sérialisation JCS (RFC 8785)
+# ─────────────────────────────────────────────────────────────────────────
+def nombre_es6(x: float) -> str:
+    """Représentation d'un nombre selon ECMAScript (Number.prototype.toString)."""
+    if x != x or x in (float("inf"), float("-inf")):
+        raise MalformedBundle("nombre non fini : interdit en JCS")
+    if x == 0:
+        return "0"
+    signe = "-" if x < 0 else ""
+    d = Decimal(repr(abs(x)))
+    chiffres = "".join(str(c) for c in d.as_tuple().digits).rstrip("0") or "0"
+    k = len(chiffres)
+    n = len(d.as_tuple().digits) + d.as_tuple().exponent  # position de la virgule
+    if k <= n <= 21:
+        s = chiffres + "0" * (n - k)
+    elif 0 < n <= 21:
+        s = chiffres[:n] + "." + chiffres[n:]
+    elif -6 < n <= 0:
+        s = "0." + "0" * (-n) + chiffres
+    else:
+        e = n - 1
+        mant = chiffres[0] if k == 1 else chiffres[0] + "." + chiffres[1:]
+        s = f"{mant}e{'+' if e >= 0 else '-'}{abs(e)}"
+    return signe + s
+
+
+def jcs(value: Any) -> str:
+    if value is None:
+        return "null"
+    if value is True:
+        return "true"
+    if value is False:
+        return "false"
+    if isinstance(value, str):
+        return json.dumps(value, ensure_ascii=False)
+    if isinstance(value, int):
+        if abs(value) > 2 ** 53:
+            raise MalformedBundle("entier hors de la plage exacte d'un double IEEE 754")
+        return str(value)
+    if isinstance(value, float):
+        return nombre_es6(value)
+    if isinstance(value, list):
+        return "[" + ",".join(jcs(v) for v in value) + "]"
+    if isinstance(value, dict):
+        cles = sorted(value.keys(), key=lambda k: k.encode("utf-16-be"))  # unités UTF-16
+        return "{" + ",".join(json.dumps(k, ensure_ascii=False) + ":" + jcs(value[k]) for k in cles) + "}"
+    raise MalformedBundle(f"type non sérialisable : {type(value).__name__}")
+
+
+def forme_canonique(value: Any) -> bytes:
+    return jcs(appliquer_precision(value)).encode("utf-8")
 
 
 # ─────────────────────────────────────────────────────────────────────────
-# 2. Condensat SHA3-256 sur la séquence canonique
+# 3. Condensat SHA3-256 (spécification, section 3)
 # ─────────────────────────────────────────────────────────────────────────
 def compute_digest(bundle: dict) -> str:
+    try:
+        engine = bundle["header"]["engine_version"]
+        inputs, outputs, gates = bundle["inputs"], bundle["outputs"], bundle["gates"]
+    except (KeyError, TypeError) as e:
+        raise MalformedBundle(f"champ obligatoire absent : {e}") from e
     h = hashlib.sha3_256()
-    for field in SIGNED_FIELDS:
-        if field == "scenario" and field not in bundle:
-            continue  # legacy déterministe : pas de scénario
-        h.update(canonical_bytes(bundle.get(field, {})))
-        h.update(b"\x1e")  # séparateur de champ (record separator)
-    h.update(bundle["header"]["engine_version"].encode("utf-8"))
+    h.update(forme_canonique(inputs))
+    if "scenario" in bundle:  # état « legacy » déterministe : pas de scénario
+        h.update(forme_canonique(bundle["scenario"]))
+    h.update(engine.encode("utf-8"))
+    h.update(forme_canonique(outputs))
+    h.update(forme_canonique(gates))
     return h.hexdigest()
 
 
 # ─────────────────────────────────────────────────────────────────────────
-# 3. Vérification du sceau
+# 4. Clés : base64 brut ou did:key (Ed25519, multicodec 0xed01)
 # ─────────────────────────────────────────────────────────────────────────
-class VerdictError(Exception):
-    pass
+_B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 
 
-def verify_bundle(bundle: dict) -> dict:
-    """Retourne un verdict structuré. Lève VerdictError si non vérifiable."""
+def base58_decode(s: str) -> bytes:
+    n = 0
+    for c in s:
+        n = n * 58 + _B58.index(c)
+    brut = n.to_bytes((n.bit_length() + 7) // 8, "big")
+    zeros = len(s) - len(s.lstrip("1"))
+    return b"\x00" * zeros + brut
+
+
+def base58_encode(b: bytes) -> str:
+    n = int.from_bytes(b, "big")
+    s = ""
+    while n:
+        n, r = divmod(n, 58)
+        s = _B58[r] + s
+    return "1" * (len(b) - len(b.lstrip(b"\x00"))) + s
+
+
+def cle_publique(valeur: str) -> bytes:
+    """Octets bruts d'une clé publique Ed25519 : did:key:z6Mk… ou base64."""
+    try:
+        if valeur.startswith("did:key:z"):
+            b = base58_decode(valeur[len("did:key:z"):])
+            if b[:2] != b"\xed\x01" or len(b) != 34:
+                raise ValueError("did:key non Ed25519")
+            return b[2:]
+        b = base64.b64decode(valeur, validate=True)
+    except (ValueError, KeyError) as e:
+        raise MalformedBundle(f"clé publique illisible : {e}") from e
+    if len(b) != 32:
+        raise MalformedBundle("une clé publique Ed25519 compte 32 octets")
+    return b
+
+
+def did_key(pub: bytes) -> str:
+    return "did:key:z" + base58_encode(b"\xed\x01" + pub)
+
+
+def _horodatage(s: str | None) -> datetime | None:
+    if not s:
+        return None
+    return datetime.fromisoformat(s.replace("Z", "+00:00")).astimezone(timezone.utc)
+
+
+def statut_ancrage(pub: bytes, signed_at: str | None, cles_confiance: list[dict]) -> str:
+    """ENROLEE, NON_ENROLEE ou REVOQUEE à la date de signature."""
+    date = _horodatage(signed_at)
+    for k in cles_confiance:
+        if cle_publique(k["pubkey"]) != pub:
+            continue
+        debut, fin = _horodatage(k.get("valid_from")), _horodatage(k.get("revoked_at"))
+        if date is None:
+            return "REVOQUEE" if fin else "ENROLEE"
+        if (debut and date < debut) or (fin and date >= fin):
+            return "REVOQUEE"
+        return "ENROLEE"
+    return "NON_ENROLEE"
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# 5. Vérification du sceau
+# ─────────────────────────────────────────────────────────────────────────
+def verify_bundle(bundle: dict, cles_confiance: list[dict] | None, integrite_seule: bool = False) -> dict:
     env = bundle.get("ices_envelope")
     if env is None:
-        raise VerdictError("Bundle non scellé (ices_envelope absent) — état legacy.")
-
-    if env.get("alg") != "Ed25519" or env.get("digest_alg") != "SHA3-256":
-        raise VerdictError(f"Algorithmes non conformes ICES v0.1 : {env.get('alg')}/{env.get('digest_alg')}")
-
-    # 3a. Intégrité : recalcul du condensat
-    recomputed = compute_digest(bundle)
-    digest_ok = (recomputed == env["digest"])
-
-    # 3b. Authenticité : signature Ed25519 sur le condensat, clé publique
-    sig_ok = False
-    if VerifyKey is None:
-        raise VerdictError("PyNaCl non installé (pip install pynacl) — vérification impossible.")
+        raise MalformedBundle("bundle non scellé (ices_envelope absent)")
     try:
-        vk = VerifyKey(base64.b64decode(env["pubkey"]))
-        vk.verify(bytes.fromhex(env["digest"]), base64.b64decode(env["sig"]))
-        sig_ok = True
+        if env["alg"] != "Ed25519" or env["digest_alg"] != "SHA3-256":
+            raise MalformedBundle(f"algorithmes non conformes à ICES v0.1 : {env['alg']}, {env['digest_alg']}")
+        claimed, sig_b64, pub_s = env["digest"], env["sig"], env["pubkey"]
+    except (KeyError, TypeError) as e:
+        raise MalformedBundle(f"enveloppe incomplète : {e}") from e
+
+    recomputed = compute_digest(bundle)
+    integrite = recomputed == claimed
+    pub = cle_publique(pub_s)
+
+    signature = False
+    if VerifyKey is None:
+        raise MalformedBundle("PyNaCl non installé (pip install pynacl)")
+    try:
+        VerifyKey(pub).verify(bytes.fromhex(claimed), base64.b64decode(sig_b64))
+        signature = True
     except (BadSignatureError, ValueError):
-        sig_ok = False
+        signature = False
 
-    gates = bundle.get("gates", [])
-    failed = [g["id"] for g in gates if g.get("status") == "FAIL"]
+    if integrite_seule:
+        ancrage = "NON_VERIFIE"
+    else:
+        ancrage = statut_ancrage(pub, env.get("signed_at"), cles_confiance or [])
 
+    ok = integrite and signature and (integrite_seule or ancrage == "ENROLEE")
     return {
-        "valid": digest_ok and sig_ok,
-        "digest_match": digest_ok,
-        "signature_valid": sig_ok,
+        "valid": ok,
+        "integrity": integrite,
+        "signature": signature,
+        "anchoring": ancrage,
         "recomputed_digest": recomputed,
-        "claimed_digest": env["digest"],
-        "domain": bundle["header"]["domain"],
+        "claimed_digest": claimed,
+        "signer": env.get("key_id"),
+        "signer_did": did_key(pub),
+        "signed_at": env.get("signed_at"),
+        "domain": bundle["header"].get("domain"),
         "engine_version": bundle["header"]["engine_version"],
-        "atlas_realization_ids": bundle.get("inputs", {}).get("geo_refs", {}).get("atlas_realization_ids", []),
-        "gates_failed": failed,
-        "key_id": env.get("key_id"),
+        "gates_failed": [g.get("id") for g in bundle.get("gates", []) if g.get("status") == "FAIL"],
+        "manifest": "NON_VERIFIE",
     }
 
 
 # ─────────────────────────────────────────────────────────────────────────
-# CLI
+# 6. Ligne de commande
 # ─────────────────────────────────────────────────────────────────────────
+_ANCRAGE = {
+    "ENROLEE": "clé enrôlée",
+    "NON_ENROLEE": "CLÉ NON ENRÔLÉE",
+    "REVOQUEE": "CLÉ RÉVOQUÉE à la date de signature",
+    "NON_VERIFIE": "non vérifié (--integrity-only)",
+}
+
+
+def _ligne(libelle: str, valeur: str) -> str:
+    return f"{libelle} {'.' * max(2, 38 - len(libelle))} {valeur}"
+
+
+def afficher(v: dict) -> None:
+    print(_ligne("Sceau ICES", "CONFORME" if v["valid"] else "REJETÉ"))
+    print(_ligne("Condensat SHA3-256", v["recomputed_digest"]))
+    print(_ligne("Intégrité (recalcul)", "OK" if v["integrity"] else "ÉCHEC : le contenu a changé après la signature"))
+    print(_ligne("Signature Ed25519", "VALIDE" if v["signature"] else "INVALIDE"))
+    print(_ligne("Signataire", f"{v['signer']} ({_ANCRAGE[v['anchoring']]})"))
+    print(_ligne("Identifiant de clé", v["signer_did"]))
+    print(_ligne("Horodatage", f"{v['signed_at']} (palier 1 : date déclarée par l'émetteur)"))
+    print(_ligne("Manifeste de Projet", "non vérifié (Phase 3 de la feuille de route)"))
+    print(_ligne("Domaine, moteur", f"{v['domain']}, {v['engine_version']}"))
+    if v["gates_failed"]:
+        print(_ligne("Contrôles en échec", ", ".join(v["gates_failed"])))
+
+
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(prog="ices verify",
-                                description="Vérifie hors-ligne un MissionBundle ICES (Ed25519).")
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    p = argparse.ArgumentParser(prog="ices verify", description="Vérifie hors ligne un MissionBundle ICES.")
     p.add_argument("bundle", type=Path, help="chemin du MissionBundle JSON")
-    p.add_argument("--json", action="store_true", help="sortie JSON brute")
-    args = p.parse_args(argv)
+    p.add_argument("--trusted-keys", type=Path, help="liste JSON des clés de confiance (key_id, pubkey, valid_from, revoked_at)")
+    p.add_argument("--integrity-only", action="store_true", help="vérifie l'intégrité et la signature sans ancrage de confiance")
+    p.add_argument("--json", action="store_true", help="sortie JSON")
+    a = p.parse_args(argv)
 
     try:
-        bundle = json.loads(args.bundle.read_text(encoding="utf-8"))
-        verdict = verify_bundle(bundle)
-    except (VerdictError, OSError, json.JSONDecodeError) as e:
-        print(f"✗ ICES : {e}", file=sys.stderr)
+        if not a.trusted_keys and not a.integrity_only:
+            raise MalformedBundle("aucune liste de clés de confiance (--trusted-keys) : refus par défaut ; "
+                                  "--integrity-only limite la vérification à l'intégrité")
+        bundle = json.loads(a.bundle.read_text(encoding="utf-8"))
+        cles = json.loads(a.trusted_keys.read_text(encoding="utf-8")) if a.trusted_keys else None
+        verdict = verify_bundle(bundle, cles, a.integrity_only)
+    except (MalformedBundle, OSError, json.JSONDecodeError, ValueError, KeyError, TypeError) as e:
+        print(f"ICES : vérification impossible : {e}", file=sys.stderr)
         return 2
 
-    if args.json:
+    if a.json:
         print(json.dumps(verdict, ensure_ascii=False, indent=2))
     else:
-        ok = verdict["valid"]
-        mark = "✓" if ok else "✗"
-        print(f"{mark} ICES verify — {'VALIDE' if ok else 'INVALIDE'}")
-        print(f"    intégrité (digest)  : {'OK' if verdict['digest_match'] else 'ÉCHEC'}")
-        print(f"    signature Ed25519   : {'OK' if verdict['signature_valid'] else 'ÉCHEC'}")
-        print(f"    domaine             : {verdict['domain']}")
-        print(f"    moteur (engine)     : {verdict['engine_version']}")
-        print(f"    réalisations Atlas  : {len(verdict['atlas_realization_ids'])}")
-        if verdict["gates_failed"]:
-            print(f"    ⚠ gates en échec    : {', '.join(verdict['gates_failed'])}")
+        afficher(verdict)
     return 0 if verdict["valid"] else 1
 
 

@@ -44,7 +44,7 @@
 \pagestyle{fancy}\fancyhf{}
 \fancyhead[L]{\small\color{intrepid}\textsc{IntrepidCore} \textemdash\ Spécification ICES v0.1}
 \fancyhead[R]{\small\thepage}
-\fancyfoot[C]{\small\textit{Standard ouvert \textemdash\ \textcopyright{} IntrepidCore 2026 \textemdash\ Diffusion libre}}
+\fancyfoot[C]{\small\textit{Standard ouvert \textemdash\ CC BY 4.0, \textcopyright{} 2026 Serge TABE DJATO \textemdash\ Diffusion libre}}
 \renewcommand{\headrulewidth}{0.4pt}\renewcommand{\footrulewidth}{0.4pt}
 
 \begin{document}
@@ -101,7 +101,7 @@ ices\_envelope & alg=Ed25519, digest SHA3-256, sig, \textbf{pubkey} (clé publiq
 \textit{Règle d'or~: même entrée logique $\rightarrow$ mêmes octets, sur toute machine.} Sinon le
 hash dérive et la preuve s'effondre.
 \begin{itemize}[leftmargin=1.3em, itemsep=1pt]
-  \item clés d'objet \textbf{triées}~; séparateurs compacts ; UTF-8 ;
+  \item sérialisation JCS (RFC~8785)~: clés d'objet \textbf{triées}~; séparateurs compacts ; UTF-8 ;
   \item flottants \textbf{arrondis} à une précision fixée par champ ;
   \item chemins machine $\rightarrow$ \textbf{empreintes} (\texttt{sha}), jamais les chemins absolus ;
   \item géométrie \textbf{snappée} au préalable (logique de \texttt{canonize.py} généralisée).
@@ -140,7 +140,9 @@ Le vérificateur de référence (\texttt{ices\_verify.py}~; cible production~: c
 \texttt{ices-core}, binaire offline) exécute trois étapes~: (1) recanonicalise les sections
 signées~; (2) recalcule le condensat SHA3-256~; (3) vérifie la signature Ed25519 avec la clé
 publique. Toute modification d'un extrant après signature fait diverger le condensat
-$\rightarrow$ \textbf{INVALIDE}.
+$\rightarrow$ \textbf{INVALIDE}. Le livre blanc ICES v4.0 ajoute un contrôle~: la clé publique doit figurer
+dans une liste de clés de confiance, valide et non révoquée à la date de signature. Le vérificateur de
+référence l'implémente et refuse par défaut un sceau si aucune liste ne lui est fournie.
 
 \begin{icesbox}[Preuve de concept (banc de test)]{vertAtlas}
 Banc exécuté~: un \texttt{MissionBundle} signé est déclaré \texttt{VALIDE}~; le même bundle dont
