@@ -1,0 +1,25 @@
+# Compilation LaTeX
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+*.fls
+*.fdb_latexmk
+*.xdv
+
+# Python
+__pycache__/
+*.pyc
+
+# Rust
+target/
+
+# Secrets : une clé privée ne doit jamais entrer dans ce dépôt
+*.key
+*.pem
+*.env
+secrets/

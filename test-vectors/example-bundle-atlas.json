@@ -1,0 +1,67 @@
+{
+  "header": {
+    "schema_version": 2,
+    "project_key": "DEMO-ATLAS-GOLFE",
+    "domain": "atlas",
+    "engine_version": "L1-L5@9f8e7d",
+    "created_utc": "2026-06-30T11:00:00Z",
+    "phase_range": {
+      "from": "L1",
+      "to": "L5"
+    }
+  },
+  "inputs": {
+    "config_canonical": {
+      "cellsize_m": 100,
+      "min_points": 8
+    },
+    "fallback_registry": {
+      "variogram_nugget_defaut": 0.1
+    },
+    "geostatistics": {
+      "variogram_model": "spherical",
+      "kriging_method": "SGS",
+      "sondage_ids": [
+        "BH-2019-014",
+        "BH-2020-233",
+        "BH-2021-087"
+      ],
+      "maille_resolution_km": 2.0
+    }
+  },
+  "outputs": {
+    "realizations": {
+      "realization_ids": [
+        "sgs:TG-GOLFE:r001",
+        "sgs:TG-GOLFE:r002"
+      ],
+      "p10_p90_range": {
+        "cbr_pct": [
+          12.4,
+          28.9
+        ]
+      },
+      "kriging_variance_ref": "var-map-golfe-2026Q2"
+    }
+  },
+  "gates": [
+    {
+      "id": "LOO_RMSE_THRESHOLD",
+      "status": "PASS",
+      "evidence": "rmse=13.27%"
+    },
+    {
+      "id": "BLOCK_VALIDATION_PASS",
+      "status": "PASS"
+    }
+  ],
+  "ices_envelope": {
+    "alg": "Ed25519",
+    "digest_alg": "SHA3-256",
+    "digest": "6122b64cce98978866cc5bb58afda45ec2e444b99790f664a6d1138668baa0d3",
+    "sig": "7J4+6hirvcrnkU89t2i/Cb9IPFIkaUuH+QXLH1xntjwfecy6opNDrf6RO4XJCSCsZLre2FALZalCkPNqvrJ/CQ==",
+    "pubkey": "zkeEN7oQkGbAplGQNnIPg/XM4JuPAydTUQhVZ4epuxI=",
+    "signed_at": "2026-06-30T10:00:01Z",
+    "key_id": "fde-demo-01"
+  }
+}

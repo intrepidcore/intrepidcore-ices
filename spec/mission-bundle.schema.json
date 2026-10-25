@@ -1,0 +1,292 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intrepidcore.io/ices/mission-bundle/v2.schema.json",
+  "title": "ICES MissionBundle",
+  "description": "Objet de preuve canonique scelle Ed25519 (ICES v0.1). Enveloppe universelle (header/gates/ices_envelope) commune a tous les produits IntrepidCore ; charge utile (inputs/outputs) specifique au domaine, validee par les blocs if/then ci-dessous. Un bundle sans 'scenario' ni 'ices_envelope' est l'etat legacy deterministe (retrocompatible).",
+  "type": "object",
+  "required": ["header", "inputs", "outputs", "gates"],
+  "additionalProperties": false,
+  "properties": {
+    "header": {
+      "type": "object",
+      "description": "Enveloppe universelle : identique quel que soit le produit emetteur.",
+      "required": ["schema_version", "project_key", "domain", "engine_version", "created_utc"],
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": { "const": 2 },
+        "project_key": { "type": "string", "minLength": 1 },
+        "domain": {
+          "enum": ["aep", "hydro", "beton", "bois", "cm", "atlas", "igniscore"],
+          "description": "aep/hydro : LCPI hydraulique (actif, stochastique). beton/bois/cm : LCPI structures (actifs deterministes normatifs, brides N=1 sur le socle unique LCPI_Solver ; surcouche stochastique conditionnee a une gate de donnees). atlas : pipeline geotechnique/geostatistique. igniscore : BioCore Engine (conditionnel)."
+        },
+        "engine_version": {
+          "type": "string",
+          "description": "Identifiant de version du moteur de calcul EMETTEUR, quel que soit le produit : git sha du noyau Rust lcpi-hydro-core (aep/hydro), version du pipeline L1-L5 (atlas, ex: 'L1-L5@9f8e7d'), git sha de BioCore Engine (igniscore). Champ neutre : ne presuppose pas quel moteur.",
+          "pattern": "^[0-9a-zA-Z._@-]{4,64}$"
+        },
+        "created_utc": { "type": "string", "format": "date-time" },
+        "phase_range": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "from": { "type": "string" },
+            "to": { "type": "string" }
+          }
+        }
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "description": "Charge utile d'entree. Seuls config_canonical et fallback_registry sont universels (EPS-001 transparence) ; le reste est valide par domaine (voir allOf/if-then racine).",
+      "required": ["config_canonical", "fallback_registry"],
+      "additionalProperties": true,
+      "properties": {
+        "config_canonical": {
+          "type": "object",
+          "description": "YAML normalise : cles triees, defauts resolus, flottants a precision fixee"
+        },
+        "fallback_registry": {
+          "type": "object",
+          "description": "Chaque defaut/coefficient applique, tous domaines confondus (ADR-011, EPS-001 transparence)"
+        },
+        "network_canonical": {
+          "type": "object",
+          "description": "[aep/hydro] Graphe snappe/normalise (cf. hydrodrain canonize.py generalise)"
+        },
+        "demand": {
+          "type": "object",
+          "description": "[aep/hydro]",
+          "properties": {
+            "p_base": { "type": "integer", "minimum": 0 },
+            "taux_pct": { "type": "number" },
+            "horizons": { "type": "array", "items": { "type": "integer" } },
+            "cpj": { "type": "number" },
+            "tc_actuel_pct": { "type": "number", "description": "[Lot L.3] Taux de couverture reseau actuel (%), avant interpolation vers l'echeance de politique de couverture visee." },
+            "desserte_bf_pct": { "type": "number", "description": "[Lot L.3] Part de la population desservie couverte par bornes-fontaines (%), le complement etant en branchement particulier." },
+            "dotation_bf_l_j_hab": { "type": "number", "description": "[Lot L.3] Dotation borne-fontaine (l/j/habitant)." },
+            "dotation_bp_l_j_hab": { "type": "number", "description": "[Lot L.3] Dotation branchement particulier (l/j/habitant)." },
+            "rendement_reseau_pct": { "type": "number", "description": "[Lot L.3] Rendement technique du reseau (%), applique au calcul du BBPJP." }
+          }
+        },
+        "geo_refs": {
+          "type": "object",
+          "description": "[aep/hydro/igniscore] Reference aux donnees Atlas consommees en amont (ground-truth). N'existe pas pour domain=atlas, qui PRODUIT ces realisations (voir geostatistics).",
+          "additionalProperties": false,
+          "properties": {
+            "dem_raster_sha": { "type": "string", "description": "empreinte du MNT, pas le binaire" },
+            "atlas_realization_ids": {
+              "type": "array",
+              "description": "IDs des realisations SGS injectees par Atlas (entrent dans le sceau)",
+              "items": { "type": "string", "pattern": "^sgs:" }
+            },
+            "atlas_pipeline_version": { "type": "string" },
+            "thiessen_method": { "type": "string" }
+          }
+        },
+        "geostatistics": {
+          "type": "object",
+          "description": "[atlas uniquement] Parametres du run geostatistique produisant les realisations.",
+          "properties": {
+            "variogram_model": { "type": "string" },
+            "kriging_method": { "enum": ["KED-H", "SCORPAN-BLUP", "MTGP-ICM", "SGS"] },
+            "sondage_ids": { "type": "array", "items": { "type": "string" } },
+            "maille_resolution_km": { "type": "number" }
+          }
+        },
+        "biomass_mix": {
+          "type": "object",
+          "description": "[igniscore uniquement] Composition biomasse et parametres d'optimisation du mix.",
+          "properties": {
+            "especes": { "type": "array", "items": { "type": "string" } },
+            "humidite_pct": { "type": "number" },
+            "pci_cible_mj_kg": { "type": "number" }
+          }
+        },
+        "structural": {
+          "type": "object",
+          "description": "[beton/bois/cm] Geometrie et charges. Mode deterministe normatif (bride N=1) : valeurs caracteristiques + coefficients partiels gamma (ELU/ELS), pas de scenario stochastique.",
+          "properties": {
+            "geometrie": { "type": "object" },
+            "charges": { "type": "object" }
+          }
+        }
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "description": "NOUVEAU (Ensemble Engine). Absent = deterministe legacy. Structure commune aep/hydro/igniscore ; sans objet pour atlas (deja probabiliste par construction via SGS). additionalProperties=true : le Scenario Compiler ecrit des metadonnees de provenance prefixees '_' (ex. _scenario_pack_sha) qui entrent dans le sceau (SDD-Scenario-Compiler-v1 S5.1).",
+      "required": ["ensemble_seed", "n_realizations", "axes"],
+      "additionalProperties": true,
+      "properties": {
+        "ensemble_seed": { "type": "integer" },
+        "n_realizations": { "type": "integer", "minimum": 1 },
+        "_scenario_pack_sha": { "type": "string", "description": "SHA3-256 du scenario_pack.parquet (K scenarios figes, ADR-006 D-3)" },
+        "_n_scenarios_reduced": { "type": "integer", "minimum": 1, "description": "K effectif retenu par la reduction (SDD-Compiler S2.2, ADR-012 AD-5)" },
+        "_reduction": { "type": "string", "description": "Methode de reduction utilisee, ex: 'wasserstein_forward_selection@cqsr_tail(q=0.90)' (ADR-012 AD-5)" },
+        "axes": {
+          "type": "object",
+          "properties": {
+            "demand_growth": { "type": "string" },
+            "iws_schedule": { "type": "string" },
+            "power_outage": {
+              "type": "string",
+              "description": "[ADR-012 AD-2] Delestage = Processus de Renouvellement Alternatif (occurrence NHPP saisonnier + durees a queue lourde), JAMAIS un Poisson homogene qui ignore la duree des coupures. Ex: 'alt_renewal(up~exp,down~heavytail;nhpp_seasonal)'."
+            },
+            "roughness": { "type": "string" },
+            "soil": { "type": "string" }
+          }
+        }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "description": "Charge utile de sortie, specifique au domaine (voir allOf/if-then racine). Aucun champ n'est universel a ce niveau.",
+      "additionalProperties": true,
+      "properties": {
+        "demand": { "type": "object" },
+        "reservoir": {
+          "type": "object",
+          "description": "[aep, Lot Q.3] lcpi-aep-core::reservoir::ReservoirSizingDecision serialisee telle quelle (candidats des 3 methodes, methode gouvernante, reserves, revalidation post-arrondi) -- deja un objet JSON libre, aucune contrainte de propriete ajoutee ici pour rester schema-first sans dupliquer la forme Rust."
+        },
+        "adduction": { "type": "object" },
+        "distribution": {
+          "type": "object",
+          "description": "[aep/hydro]",
+          "properties": {
+            "n_troncons": { "type": "integer", "minimum": 0 },
+            "longueur_m": { "type": "number", "minimum": 0 },
+            "solveurs": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "robustness": {
+          "type": "object",
+          "description": "[aep/hydro/igniscore] Sortie stochastique de l'Ensemble Engine.",
+          "properties": {
+            "p_service_ge_target": { "type": "number", "minimum": 0, "maximum": 1 },
+            "equity_index": {
+              "type": "number",
+              "description": "[ADR-012] Coefficient Volumetrique VC (Ceita 2023), pondere par la part demographique legitime du noeud. Distinct du priority_weight politique (D-13), qui reste une ponderation de la fonction objectif, pas ce champ."
+            },
+            "resilience_outage": {
+              "type": "number",
+              "description": "[ADR-012 AD-3] Resilience au delestage electrique. Calcule par metriques volumetriques/temporelles (COT/EH, LOWLP, EENS/EUW). INTERDICTION de l'indice de Todini ici (son denominateur s'effondre quand les pompes s'arretent). Todini reste valide pour la resilience MECANIQUE (isolement d'un troncon casse), autre champ."
+            }
+          }
+        },
+        "costs": {
+          "type": "object",
+          "description": "[aep/hydro]",
+          "properties": {
+            "capex_fcfa": { "type": "number", "minimum": 0 },
+            "tarif_eie": { "type": "number" },
+            "capex_breakdown": {
+              "type": "object",
+              "description": "[aep, Lot Q.3] lcpi-aep-core::cost::CapexBreakdown serialise (postes/categories) -- decomposition complete, pas seulement le total capex_fcfa."
+            },
+            "opex_breakdown": {
+              "type": "object",
+              "description": "[aep, Lot Q.3] lcpi-aep-core::cost::OpexComponents serialise (amortissement/energie/entretien/personnel)."
+            },
+            "tariff_result": {
+              "type": "object",
+              "description": "[aep, Lot Q.3] lcpi-aep-core::cost::TariffResult serialise (tarif de base + tarif par categorie + frais de branchement)."
+            }
+          }
+        },
+        "realizations": {
+          "type": "object",
+          "description": "[atlas uniquement] Realisations SGS et incertitude produites par le run.",
+          "properties": {
+            "realization_ids": { "type": "array", "items": { "type": "string", "pattern": "^sgs:" } },
+            "p10_p90_range": { "type": "object" },
+            "kriging_variance_ref": { "type": "string" }
+          }
+        },
+        "biocore": {
+          "type": "object",
+          "description": "[igniscore uniquement] Resultats de caracterisation/dimensionnement/optimisation.",
+          "properties": {
+            "pci_mj_kg": { "type": "number" },
+            "mix_pareto_ref": { "type": "string" },
+            "roi": { "type": "object" }
+          }
+        },
+        "structural_result": {
+          "type": "object",
+          "description": "[beton/bois/cm] Resultat deterministe normatif (bride N=1)."
+        }
+      }
+    },
+    "gates": {
+      "type": "array",
+      "description": "Controles EPS-001 (PASS/WARN/FAIL), identifiants propres a chaque domaine. La preuve inclut aussi les echecs.",
+      "items": {
+        "type": "object",
+        "required": ["id", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "status": { "enum": ["PASS", "WARN", "FAIL"] },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "ices_envelope": {
+      "type": "object",
+      "description": "Le sceau. Genere au finalize() du moteur, quel que soit le domaine. [ADR-012 AD-4] ICES est un PROFIL DURCI aligne sur la cryptosuite W3C eddsa-rdfc-2022 (canonicalisation RDFC-1.0 + Ed25519), avec une divergence assumee : hachage SHA3-256 au lieu de SHA-256 (immunite length-extension). Non bit-compatible avec un verifieur eddsa-rdfc-2022 vanille.",
+      "required": ["alg", "digest_alg", "digest", "sig", "pubkey"],
+      "additionalProperties": false,
+      "properties": {
+        "alg": { "const": "Ed25519" },
+        "digest_alg": { "const": "SHA3-256" },
+        "digest": {
+          "type": "string",
+          "description": "hex SHA3-256( canon(inputs) || canon(scenario) || engine_version || canon(outputs) || canon(gates) )",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "sig": { "type": "string", "description": "Ed25519 signature, base64" },
+        "pubkey": { "type": "string", "description": "cle publique Ed25519. [ADR-012 AD-4] exprimable en did:key (z6Mk...) pour resolution hors-ligne (verification CEDEAO sans reseau), sinon base64 (vendor)" },
+        "signed_at": { "type": "string", "format": "date-time" },
+        "key_id": { "type": "string", "description": "identifiant de cle (FDE / racine)" }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "header": { "properties": { "domain": { "enum": ["aep", "hydro"] } } } } },
+      "then": {
+        "properties": {
+          "inputs": { "required": ["network_canonical", "demand", "geo_refs"] },
+          "outputs": { "required": ["distribution", "costs"] }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "header": { "properties": { "domain": { "const": "atlas" } } } } },
+      "then": {
+        "properties": {
+          "inputs": { "required": ["geostatistics"] },
+          "outputs": { "required": ["realizations"] }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "header": { "properties": { "domain": { "const": "igniscore" } } } } },
+      "then": {
+        "properties": {
+          "inputs": { "required": ["biomass_mix"] },
+          "outputs": { "required": ["biocore"] }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "header": { "properties": { "domain": { "enum": ["beton", "bois", "cm"] } } } } },
+      "then": {
+        "properties": {
+          "inputs": { "required": ["structural"] },
+          "outputs": { "required": ["structural_result"] }
+        }
+      }
+    }
+  ]
+}

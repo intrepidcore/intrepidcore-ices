@@ -1,0 +1,188 @@
+%% SPDX-License-Identifier: CC-BY-4.0
+%% SPDX-FileCopyrightText: 2026 Serge TABE DJATO
+% !TeX program = xelatex
+%% ============================================================
+%% IntrepidCore — SPÉCIFICATION ICES v0.1
+%% Le MissionBundle, la canonicalisation, le sceau Ed25519
+%% ============================================================
+\documentclass[11pt,a4paper]{article}
+\usepackage[a4paper,top=2.4cm,bottom=2.6cm,left=2.5cm,right=2.5cm]{geometry}
+\usepackage[french]{babel}\usepackage{csquotes}\usepackage{fontspec}\usepackage{microtype}
+\IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{TeX Gyre Termes}}
+\usepackage{amsmath}\usepackage{graphicx}\usepackage{booktabs}\usepackage{array}
+\usepackage{enumitem}\usepackage{titlesec}\usepackage{xcolor}\usepackage{fancyhdr}\usepackage{tcolorbox}
+\usepackage{listings}\usepackage{tikz}\usetikzlibrary{arrows.meta,positioning}
+\tcbuselibrary{skins}\usepackage{hyperref}
+
+\definecolor{intrepid}{RGB}{0,57,107}\definecolor{accent}{RGB}{213,93,36}
+\definecolor{cyanIC}{RGB}{0,196,212}\definecolor{vertAtlas}{RGB}{64,145,108}
+\definecolor{rowgray}{RGB}{240,240,240}\definecolor{codebg}{RGB}{245,247,250}
+\IfFontExistsTF{Virgil 3 YOFF}{\newfontfamily\chartfont{Virgil 3 YOFF}}{\let\chartfont\sffamily}
+
+\lstset{basicstyle=\ttfamily\footnotesize, backgroundcolor=\color{codebg},
+  breaklines=true, frame=single, rulecolor=\color{gray!40}, columns=fullflexible,
+  keywordstyle=\color{intrepid}\bfseries, commentstyle=\color{vertAtlas}}
+
+\hypersetup{hidelinks, pdfauthor={IntrepidCore}, pdftitle={ICES v0.1 — Spécification}}
+
+\newcommand{\mylogo}{\includegraphics[height=2cm]{logo}}
+\newcommand{\headerblock}{%
+  \noindent\begin{minipage}[c]{0.45\linewidth}\mylogo\end{minipage}\hfill
+  \begin{minipage}[c]{0.52\linewidth}\raggedleft
+    {\small\color{intrepid}\textit{Innover localement. Impacter globalement.}}\\[4pt]
+    {\small\color{intrepid}Build intelligent engineering for African infrastructure.}\\[4pt]
+    {\footnotesize\color{gray}Spécification ICES v0.1 \textperiodcentered\ Juin~2026 \textperiodcentered\ \ttfamily contact@intrepidcore.io}%
+  \end{minipage}\par\vspace{5pt}\rule{\linewidth}{1pt}\vspace{0.4cm}}
+
+\newtcolorbox{icesbox}[2][]{enhanced, colback=#2!8!white, colframe=#2, boxrule=0.6pt,
+  left=6pt, right=6pt, top=5pt, bottom=5pt, fonttitle=\bfseries\small\color{#2}, title={#1}}
+
+\setlength{\parindent}{0pt}\setlength{\parskip}{6pt plus 1pt minus 0.5pt}
+\titleformat{\section}{\normalfont\fontsize{12.5}{14}\bfseries\color{intrepid}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\normalfont\fontsize{11}{13}\bfseries\color{accent}}{}{0em}{}
+
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\color{intrepid}\textsc{IntrepidCore} \textemdash\ Spécification ICES v0.1}
+\fancyhead[R]{\small\thepage}
+\fancyfoot[C]{\small\textit{Standard ouvert \textemdash\ \textcopyright{} IntrepidCore 2026 \textemdash\ Diffusion libre}}
+\renewcommand{\headrulewidth}{0.4pt}\renewcommand{\footrulewidth}{0.4pt}
+
+\begin{document}
+\thispagestyle{empty}
+\headerblock
+
+\begin{center}
+  {\fontsize{16}{19}\bfseries\color{intrepid} SPÉCIFICATION ICES v0.1}\\[4pt]
+  {\fontsize{11}{14}\bfseries Le MissionBundle, la canonicalisation et le sceau Ed25519}\\[4pt]
+  {\fontsize{10}{12}\normalfont\color{gray} Standard ouvert \textperiodcentered\ Juin~2026 \textperiodcentered\ Artefacts~: \texttt{mission-bundle.schema.json}, \texttt{ices\_verify.py}}
+\end{center}
+\vspace{0.2cm}\rule{\linewidth}{0.5pt}\vspace{0.2cm}
+
+\begin{icesbox}[Objet]{intrepid}
+ICES (IntrepidCore Engineering Standard) définit un \textbf{format de preuve d'intégrité de
+calcul d'ingénierie}. Un livrable ICES est un \texttt{MissionBundle} scellé par signature
+\textbf{asymétrique Ed25519}, qu'un tiers (bailleur, auditeur) vérifie \textbf{hors-ligne, sans
+secret partagé}. ICES est un \textbf{standard ouvert et gratuit}~; sa génération et sa
+vérification ne donnent lieu à aucune facturation.
+\end{icesbox}
+
+\section{Le MissionBundle}
+Objet JSON typé (schéma normatif~: \texttt{mission-bundle.schema.json}, JSON~Schema 2020-12),
+en cinq sections~: \texttt{header}, \texttt{inputs}, \texttt{scenario} (optionnel),
+\texttt{outputs}, \texttt{gates}, plus le sceau \texttt{ices\_envelope}. Un bundle \emph{sans}
+\texttt{scenario} ni \texttt{ices\_envelope} est l'état legacy déterministe~:
+\textbf{rétrocompatibilité par construction}.
+
+\begin{icesbox}[Enveloppe universelle vs charge utile]{accent}
+\texttt{header}, \texttt{gates} et \texttt{ices\_envelope} sont \textbf{identiques quel que soit
+le produit émetteur} (LCPI, Atlas, IgnisCore). \texttt{inputs} et \texttt{outputs} portent une
+partie universelle (config, FallbackRegistry) et une partie \textbf{propre au domaine}, validée
+par des règles conditionnelles (\texttt{if header.domain == \ldots then \ldots}) dans le schéma
+normatif. C'est ce qui rend ICES nativement extensible à Atlas et IgnisCore sans dénaturer sa
+structure hydraulique d'origine.
+\end{icesbox}
+
+\begin{center}\small
+\begin{tabular}{@{}>{\ttfamily}p{2.6cm} p{11.6cm}@{}}
+\toprule
+\normalfont\textbf{Section} & \textbf{Contenu (résumé)} \\
+\midrule
+header & schema\_version, project\_key, \textbf{domain} (aep/hydro/atlas/igniscore/\ldots), \textbf{engine\_version} (identifiant neutre du moteur émetteur), date \\
+inputs & \textbf{universel}~: config canonisée, FallbackRegistry \textperiodcentered\ \textbf{spécifique au domaine}~: réseau (aep/hydro), geo\_refs (IDs réalisations Atlas), geostatistics (atlas), biomass\_mix (igniscore) \\
+scenario & ensemble\_seed, n\_realizations, axes d'incertitude (sol, demande, IWS, coupures) — non applicable à \texttt{atlas} (déjà probabiliste via SGS) \\
+outputs & \textbf{spécifique au domaine}~: distribution/coûts (aep/hydro), realizations (atlas), biocore (igniscore) \textperiodcentered\ robustness (P(service), équité) quand l'Ensemble Engine s'applique \\
+gates & les contrôles EPS-001 (PASS/WARN/FAIL) — la preuve inclut aussi les échecs \\
+ices\_envelope & alg=Ed25519, digest SHA3-256, sig, \textbf{pubkey} (clé publique vérifiable) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Canonicalisation déterministe}
+\textit{Règle d'or~: même entrée logique $\rightarrow$ mêmes octets, sur toute machine.} Sinon le
+hash dérive et la preuve s'effondre.
+\begin{itemize}[leftmargin=1.3em, itemsep=1pt]
+  \item clés d'objet \textbf{triées}~; séparateurs compacts ; UTF-8 ;
+  \item flottants \textbf{arrondis} à une précision fixée par champ ;
+  \item chemins machine $\rightarrow$ \textbf{empreintes} (\texttt{sha}), jamais les chemins absolus ;
+  \item géométrie \textbf{snappée} au préalable (logique de \texttt{canonize.py} généralisée).
+\end{itemize}
+
+\section{Le sceau}
+Au point de sortie unique du moteur (\texttt{finalize()}), quel que soit le produit~:
+\[
+\texttt{digest} = \text{SHA3-256}\big(\,\text{canon(inputs)}\ \|\ \text{canon(scenario)}\ \|\
+\text{engine\_version}\ \|\ \text{canon(outputs)}\ \|\ \text{canon(gates)}\,\big)
+\]
+\[
+\texttt{sig} = \text{Ed25519.sign}(\texttt{digest},\ sk_{\text{émetteur}})
+\]
+La clé privée $sk$ reste chez l'émetteur~; la clé publique $pk$ est diffusée. \textbf{Ed25519}
+(RFC~8032) est choisi pour son \textbf{déterminisme} (sceau reproductible) et son indépendance à
+tout aléa de signature.
+
+\begin{figure}[h]\centering
+\begin{tikzpicture}[font=\chartfont\footnotesize, node distance=0.9cm,
+  b/.style={draw=intrepid, fill=intrepid!8, rounded corners=2pt, inner sep=4pt, text=intrepid}]
+\node[b] (i) {inputs\,$\|$\,scenario\,$\|$\,engine\,$\|$\,outputs\,$\|$\,gates};
+\node[b, right=1.1cm of i, draw=accent, text=accent, fill=accent!10] (h) {SHA3-256};
+\node[b, right=1.0cm of h, draw=cyanIC, text=black, fill=cyanIC!12] (s) {Ed25519 sign};
+\node[b, right=1.0cm of s, fill=intrepid!14] (e) {ices\_envelope};
+\node[draw=vertAtlas, fill=vertAtlas!12, rounded corners=2pt, below=0.7cm of s, inner sep=4pt,
+   text width=5cm, align=center] (v) {\textbf{\color{vertAtlas}ices verify} — clé publique, hors-ligne};
+\draw[-{Stealth[length=2mm]}, intrepid] (i)--(h); \draw[-{Stealth[length=2mm]}, intrepid] (h)--(s);
+\draw[-{Stealth[length=2mm]}, intrepid] (s)--(e);
+\draw[-{Stealth[length=2mm]}, vertAtlas] (e.south) |- (v.east);
+\end{tikzpicture}
+\end{figure}
+
+\section{Vérification (\texttt{ices verify})}
+Le vérificateur de référence (\texttt{ices\_verify.py}~; cible production~: crate Rust
+\texttt{ices-core}, binaire offline) exécute trois étapes~: (1) recanonicalise les sections
+signées~; (2) recalcule le condensat SHA3-256~; (3) vérifie la signature Ed25519 avec la clé
+publique. Toute modification d'un extrant après signature fait diverger le condensat
+$\rightarrow$ \textbf{INVALIDE}.
+
+\begin{icesbox}[Preuve de concept (banc de test)]{vertAtlas}
+Banc exécuté~: un \texttt{MissionBundle} signé est déclaré \texttt{VALIDE}~; le même bundle dont
+on baisse le CAPEX \emph{après} signature est déclaré \texttt{INVALIDE} (intégrité~: ÉCHEC). La
+fraude post-calcul est détectée par un tiers, sans secret. \textit{C'est la première des quatre
+preuves de structuration (jalon~G1).}
+\end{icesbox}
+
+\section{Extension multi-domaine (Atlas, IgnisCore)}
+Le schéma v2 est délibérément \textbf{généralisé}~: seuls \texttt{header}, \texttt{gates} et
+\texttt{ices\_envelope} sont universels~; \texttt{inputs}/\texttt{outputs} varient par domaine
+via des règles conditionnelles (\texttt{allOf/if-then} sur \texttt{header.domain}). Un bundle
+\texttt{atlas} exige \texttt{inputs.geostatistics} et \texttt{outputs.realizations}~; un bundle
+\texttt{igniscore} exige \texttt{inputs.biomass\_mix} et \texttt{outputs.biocore}~; un bundle
+\texttt{aep/hydro} exige le réseau et la distribution.
+
+\begin{icesbox}[Preuve de généralisation (double banc de test)]{cyanIC}
+Un \texttt{MissionBundle} de domaine \texttt{atlas} (run géostatistique~: variogramme, méthode
+SGS, IDs de sondage en entrée~; réalisations P10--P90 en sortie) a été signé, validé contre le
+schéma et vérifié \texttt{VALIDE}, au même titre qu'un bundle \texttt{aep}. Contre-épreuve~:
+maquiller ce même bundle en \texttt{domain: aep} le fait \textbf{rejeter} par le schéma (champs
+hydrauliques requis absents) — la séparation enveloppe/charge utile fonctionne, elle n'est pas
+qu'une déclaration d'intention.
+\end{icesbox}
+
+\begin{icesbox}[Limite assumée — ce qui n'est pas encore fait]{accent}
+Cette généralisation porte le \textbf{schéma et le vérificateur}. Les codebases Atlas et
+IgnisCore n'exposent pas encore de point \texttt{finalize()} équivalent à celui de LCPI~: le
+câblage réel (émission d'un bundle scellé à la fin d'un run de krigeage ou d'un dimensionnement
+BioCore) reste un chantier d'intégration à part entière, non encore réalisé. Ne pas
+surpromettre~: le standard est prêt à les recevoir, il ne les couvre pas encore en production.
+\end{icesbox}
+
+\section{Statut \& gouvernance}
+ICES v0.1 est publié en \textbf{standard ouvert}. La spécification, le schéma JSON et le
+vérificateur de référence sont libres d'accès. Gestion des clés~: HSM/KMS pour la racine, clés
+FDE par mission. ICES ne certifie pas la responsabilité de l'ingénieur, mais l'\textbf{intégrité}
+du calcul (intrants, moteur, extrants).
+
+\vspace{0.3cm}\rule{\linewidth}{0.4pt}
+\begin{center}\footnotesize\color{gray}
+ICES v0.1 \textperiodcentered\ IntrepidCore \textperiodcentered\ Artefacts normatifs~:
+\texttt{mission-bundle.schema.json} \textperiodcentered\ \texttt{ices\_verify.py}
+\end{center}
+\end{document}

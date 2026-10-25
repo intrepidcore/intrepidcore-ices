@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "Si vous utilisez ICES, merci de le citer ainsi."
+title: "ICES, IntrepidCore Engineering Standard"
+type: software
+version: "0.1"
+authors:
+  - family-names: "TABE DJATO"
+    given-names: "Serge"
+license: Apache-2.0
+repository-code: "https://github.com/intrepidcore/intrepidcore-ices"
+abstract: "Standard de scellement cryptographique des notes de calcul d'ingénierie : canonicalisation déterministe, condensat SHA3-256, signature Ed25519, vérification hors ligne."
+keywords:
+  - ICES
+  - Ed25519
+  - SHA3-256
+  - ingénierie
+  - vérification hors ligne
