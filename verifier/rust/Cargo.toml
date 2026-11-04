@@ -1,0 +1,32 @@
+[package]
+name = "ices-core"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "Vérificateur hors ligne de sceaux ICES (MissionBundle) : JCS RFC 8785, SHA3-256, Ed25519, ancrage de confiance"
+license = "Apache-2.0"
+repository = "https://github.com/intrepidcore/intrepidcore-ices"
+publish = false
+
+[lib]
+name = "ices_core"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ices"
+path = "src/bin/ices.rs"
+
+[dependencies]
+serde_json = { version = "1", features = ["float_roundtrip"] }
+sha3 = "0.10"
+ed25519-dalek = { version = "2", default-features = false, features = ["std"] }
+bs58 = "0.5"
+base64 = "0.22"
+chrono = { version = "0.4", default-features = false, features = ["std"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

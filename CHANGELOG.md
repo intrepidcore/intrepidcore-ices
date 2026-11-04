@@ -13,6 +13,15 @@
 - Figures régénérées en vectoriel, sans titre dans l'image, sans chiffre inventé, avec texte alternatif.
 - Erreur corrigée : l'exemple « avant et après » montrait `6.200000`, alors que la forme JCS de 6,2 est `6.2`.
 
+### Vérificateur de production (Rust)
+
+- Crate `ices-core` et binaire `ices` (`ices verify`, `ices canon`) : arrondi par champ, JCS (RFC 8785), SHA3-256, Ed25519 en vérification stricte, `did:key`, ancrage de confiance avec révocation à la date de signature, refus par défaut sans liste de clés, codes de sortie 0, 1 et 2.
+- Six vecteurs publics reproduits, avec les mêmes codes de sortie ; 33 tests Rust, dont l'exemple et les nombres de la RFC 8785.
+- Test de parité avec le script Python (`tests/test_rust_parity.py`) : condensats identiques sur des milliers de bundles aléatoires, aucun arrêt brutal sur des fichiers abîmés.
+- Deux écarts découverts par ce test et corrigés : lecture exacte des flottants (`float_roundtrip`) et départage des écritures équidistantes au chiffre pair (conformité ECMAScript).
+- Bornes déclarées : étape 6 (Manifeste de Projet), journal de transparence et horodatage en deux paliers non implémentés ; Linux construit par la CI, pas encore exécutée ; pas d'audit cryptographique indépendant.
+- Workflow `.github/workflows/verifier-rust.yml` : construction et tests sous Linux et Windows, binaire statique musl.
+
 ### Vérificateur de référence (Python)
 
 - Condensat calculé dans l'ordre de la spécification (`engine_version` entre `scenario` et `outputs`) ; l'ancien code l'ajoutait à la fin.

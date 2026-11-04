@@ -1,0 +1,70 @@
+name: verifier-rust
+
+on:
+  push:
+    paths: ["verifier/rust/**", "test-vectors/**", "tests/**", ".github/workflows/verifier-rust.yml"]
+  pull_request:
+    paths: ["verifier/rust/**", "test-vectors/**", "tests/**", ".github/workflows/verifier-rust.yml"]
+
+jobs:
+  construire-et-tester:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: verifier/rust
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Construire
+        run: cargo build --release --locked
+      - name: Tests Rust
+        run: cargo test --release --locked
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Parité avec le vérificateur Python
+        shell: bash
+        env:
+          ICES_FUZZ: "1500"
+          ICES_FUZZ_OCTETS: "500"
+        run: |
+          pip install pynacl
+          ext=""; [ "$RUNNER_OS" = "Windows" ] && ext=".exe"
+          ICES_BIN="$PWD/target/release/ices$ext" python ../../tests/test_rust_parity.py
+      - name: Six vecteurs publics
+        shell: bash
+        run: |
+          set -u
+          ext=""; [ "$RUNNER_OS" = "Windows" ] && ext=".exe"
+          b="./target/release/ices$ext"; v=../../test-vectors; k=$v/trusted-keys.json
+          check() { "$b" verify "$v/$1" --trusted-keys "$k" >/dev/null 2>&1; code=$?; [ "$code" = "$2" ] || { echo "$1 : code $code, attendu $2"; exit 1; }; }
+          check example-bundle.json 0
+          check example-bundle-atlas.json 0
+          check tampered-bundle.json 1
+          check unenrolled-bundle.json 1
+          check revoked-bundle.json 1
+          check malformed-bundle.json 2
+
+  binaire-statique-linux:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: verifier/rust
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-musl
+      - run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - run: cargo build --release --locked --target x86_64-unknown-linux-musl
+      - name: Vérifier qu'il est statique
+        run: |
+          file target/x86_64-unknown-linux-musl/release/ices | tee /dev/stderr | grep -q "statically linked"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ices-linux-x86_64-musl
+          path: verifier/rust/target/x86_64-unknown-linux-musl/release/ices
