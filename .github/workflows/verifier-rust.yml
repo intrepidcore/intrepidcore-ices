@@ -41,7 +41,7 @@ jobs:
           set -u
           ext=""; [ "$RUNNER_OS" = "Windows" ] && ext=".exe"
           b="./target/release/ices$ext"; v=../../test-vectors; k=$v/trusted-keys.json
-          check() { "$b" verify "$v/$1" --trusted-keys "$k" >/dev/null 2>&1; code=$?; [ "$code" = "$2" ] || { echo "$1 : code $code, attendu $2"; exit 1; }; }
+          check() { code=0; "$b" verify "$v/$1" --trusted-keys "$k" >/dev/null 2>&1 || code=$?; [ "$code" = "$2" ] || { echo "$1 : code $code, attendu $2"; exit 1; }; echo "$1 : code $code (attendu $2)"; }
           check example-bundle.json 0
           check example-bundle-atlas.json 0
           check tampered-bundle.json 1
@@ -63,7 +63,7 @@ jobs:
       - run: cargo build --release --locked --target x86_64-unknown-linux-musl
       - name: Vérifier qu'il est statique
         run: |
-          file target/x86_64-unknown-linux-musl/release/ices | tee /dev/stderr | grep -q "statically linked"
+          file target/x86_64-unknown-linux-musl/release/ices | tee /dev/stderr | grep -qE "statically linked|static-pie linked"
       - uses: actions/upload-artifact@v4
         with:
           name: ices-linux-x86_64-musl
