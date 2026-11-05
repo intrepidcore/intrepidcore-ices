@@ -13,6 +13,12 @@
 - Figures régénérées en vectoriel, sans titre dans l'image, sans chiffre inventé, avec texte alternatif.
 - Erreur corrigée : l'exemple « avant et après » montrait `6.200000`, alors que la forme JCS de 6,2 est `6.2`.
 
+### Correction du livre blanc v4.0 (5 novembre 2026)
+
+- Tableau d'avancement (tableau 3) : le vérificateur de production en Rust passe d'« exploratoire » à « vérifié » pour les étapes 1 à 5 et 7, avec ses bornes écrites (ligne de commande, sans interface graphique, sans audit cryptographique indépendant). Date du tableau portée au 5 novembre 2026.
+- Section « Étapes de la vérification » : mentionne le binaire Rust.
+- Annexe, tableau de l'enveloppe : la signature Ed25519 compte 64 octets, et non 32 (le condensat compte 32 octets).
+
 ### Vérificateur de production (Rust)
 
 - Crate `ices-core` et binaire `ices` (`ices verify`, `ices canon`) : arrondi par champ, JCS (RFC 8785), SHA3-256, Ed25519 en vérification stricte, `did:key`, ancrage de confiance avec révocation à la date de signature, refus par défaut sans liste de clés, codes de sortie 0, 1 et 2.

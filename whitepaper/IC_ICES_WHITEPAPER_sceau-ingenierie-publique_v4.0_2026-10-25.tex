@@ -431,7 +431,7 @@ La vérification d'un sceau ne requiert ni réseau ni accès à IntrepidCore. Le
   \item rend un verdict avec le motif précis du rejet le cas échéant : condensat divergent, signature invalide, clé non enrôlée, clé révoquée à la date de signature, clé non autorisée pour cette phase.
 \end{enumerate}
 
-Le vérificateur de référence de la version 0.1 implémente les étapes 1 à 5 et 7 : l'étape 5 s'appuie sur une liste de clés de confiance fournie à l'exécution, avec date de validité et date de révocation, et le vérificateur refuse par défaut un sceau si aucune liste n'est fournie. Le journal de transparence de la section~\ref{sec:confiance} arrive en Phase~2. L'étape 6 relève de la Phase~3.
+Le vérificateur de référence de la version 0.1 (script Python) et le vérificateur de production (binaire Rust, en ligne de commande) implémentent les étapes 1 à 5 et 7 : l'étape 5 s'appuie sur une liste de clés de confiance fournie à l'exécution, avec date de validité et date de révocation, et le vérificateur refuse par défaut un sceau si aucune liste n'est fournie. Le journal de transparence de la section~\ref{sec:confiance} arrive en Phase~2. L'étape 6 relève de la Phase~3.
 
 Un \texttt{did:key} est un identifiant de clé publique auto-descriptif : il contient, encodés en multibase, les octets bruts de la clé Ed25519, sans autorité de certification centrale ni résolution réseau~\cite{w3c_did_key}. Cette propriété rend l'étape 3 exécutable hors ligne.
 
@@ -659,7 +659,7 @@ La figure~\ref{fig:roadmap} situe les six phases de gouvernance. Les échéances
 Le tableau~\ref{tab:maturite} distingue ce que la version 0.1 implémente de ce qui reste à construire. Le niveau d'affirmation suit le guide de rédaction d'IntrepidCore : \emph{vérifié} suppose une méthode reproductible et un corpus identifié, \emph{exploratoire} une idée ou un résultat préliminaire aux limites explicites.
 
 \begin{table}[H]\centering\small
-\caption{État d'avancement des mécanismes d'ICES au 25 octobre 2026 et niveau d'affirmation.}\label{tab:maturite}
+\caption{État d'avancement des mécanismes d'ICES au 5 novembre 2026 et niveau d'affirmation.}\label{tab:maturite}
 \begin{tabularx}{\linewidth}{@{}Xp{2.5cm}p{1.5cm}@{}}
 \toprule
 \textbf{Mécanisme} & \textbf{Niveau d'affirmation} & \textbf{Phase} \\
@@ -667,7 +667,7 @@ Le tableau~\ref{tab:maturite} distingue ce que la version 0.1 implémente de ce 
 Arrondi par champ et canonicalisation JCS : implémentés dans le vérificateur de référence, testés sur l'exemple de la RFC~8785 et sur les vecteurs publics & vérifié & 0 \\
 Condensat SHA3-256 et signature Ed25519, avec identifiant \texttt{did:key} & vérifié & 0 \\
 Liste locale de clés de confiance, avec date de validité et révocation, refus par défaut & vérifié & 0 \\
-Vérificateur de production, binaire Rust hors ligne & exploratoire & 0 \\
+Vérificateur de production, binaire Rust hors ligne en ligne de commande : étapes 1 à 5 et 7, mêmes condensats que le vérificateur de référence sur les vecteurs publics et sur des dossiers aléatoires, construit et testé sous Windows et Linux ; sans interface graphique et sans audit cryptographique indépendant & vérifié & 0 \\
 Journal de transparence et moniteurs tiers & exploratoire & 2 \\
 Clés courtes, horodatage en deux paliers, attestation agrafée & exploratoire & 2 \\
 Cérémonie de clé racine à seuil & exploratoire & 2 \\
@@ -751,7 +751,7 @@ L'enveloppe \texttt{ices\_envelope} porte sept champs (tableau~\ref{tab:envelopp
 \texttt{alg} & Algorithme de signature : \texttt{Ed25519} \\
 \texttt{digest\_alg} & Algorithme de condensat : \texttt{SHA3-256} \\
 \texttt{digest} & Condensat de la section~\ref{sec:canon}, en hexadécimal (64 caractères) \\
-\texttt{sig} & Signature Ed25519 du condensat (32 octets), en base64 \\
+\texttt{sig} & Signature Ed25519 du condensat (64 octets), en base64 \\
 \texttt{pubkey} & Clé publique Ed25519, en base64 ou sous la forme \texttt{did:key:z6Mk\ldots} \\
 \texttt{signed\_at} & Date de signature déclarée par l'émetteur (horodatage de palier~1) \\
 \texttt{key\_id} & Identifiant de la clé dans la liste de clés de confiance \\
