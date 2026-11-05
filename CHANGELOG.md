@@ -19,7 +19,7 @@
 - Six vecteurs publics reproduits, avec les mêmes codes de sortie ; 33 tests Rust, dont l'exemple et les nombres de la RFC 8785.
 - Test de parité avec le script Python (`tests/test_rust_parity.py`) : condensats identiques sur des milliers de bundles aléatoires, aucun arrêt brutal sur des fichiers abîmés.
 - Deux écarts découverts par ce test et corrigés : lecture exacte des flottants (`float_roundtrip`) et départage des écritures équidistantes au chiffre pair (conformité ECMAScript).
-- Bornes déclarées : étape 6 (Manifeste de Projet), journal de transparence et horodatage en deux paliers non implémentés ; Linux construit par la CI, pas encore exécutée ; pas d'audit cryptographique indépendant.
+- Bornes déclarées : étape 6 (Manifeste de Projet), journal de transparence et horodatage en deux paliers non implémentés ; CI Linux (Ubuntu, binaire musl statique) et Windows réussie le 05/11/2026, ni macOS ni ARM testés ; pas d'audit cryptographique indépendant.
 - Workflow `.github/workflows/verifier-rust.yml` : construction et tests sous Linux et Windows, binaire statique musl.
 
 ### Vérificateur de référence (Python)

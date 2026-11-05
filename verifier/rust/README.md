@@ -32,7 +32,7 @@ Ce que la version 0.1 du vérificateur ne fait pas, et que les sorties disent :
 - **Séparation de domaine entre blocs** : la spécification v0.1 concatène sans séparateur ; le code suit le texte. Changer cela est une décision de spécification (version 0.2), pas un réglage du code.
 - **Interface graphique** : hors périmètre, chantier distinct.
 - **Pas d'audit cryptographique indépendant.** Le code s'appuie sur `ed25519-dalek` et `sha3` (RustCrypto), non sur une implémentation maison.
-- **Plateformes.** Construit et testé sous Windows x86_64 avec la chaîne `x86_64-pc-windows-gnu` (MSVC n'est pas installé sur la machine de développement). Linux : le code passe `cargo check --target x86_64-unknown-linux-gnu`, et le workflow `.github/workflows/verifier-rust.yml` construit et teste sous Linux et Windows, mais il n'a pas encore été exécuté.
+- **Plateformes.** Construit et testé sous Windows x86_64 avec la chaîne `x86_64-pc-windows-gnu` (MSVC n'est pas installé sur la machine de développement). Linux : le workflow `.github/workflows/verifier-rust.yml` construit et teste sous Ubuntu et Windows (33 tests Rust, parité avec le script Python, six vecteurs publics) et produit un binaire statique musl ; exécution réussie le 5 novembre 2026 (commit `a4c9c9a`). Pas de test sous macOS ni sur architecture ARM.
 
 ## Écarts connus avec le vérificateur Python
 
